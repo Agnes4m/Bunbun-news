@@ -1,0 +1,47 @@
+# ===== Bunbun News / 文闻 =====
+
+# --- ZCode workspace metadata ---
+.zcode/
+
+# --- Gradle ---
+.gradle/
+build/
+!gradle/wrapper/gradle-wrapper.jar
+
+# --- Android / Kotlin ---
+local.properties
+*.iml
+*.apk
+*.aab
+*.aar
+*.ap_
+*.dex
+*.class
+.idea/
+captures/
+.externalNativeBuild/
+.cxx/
+.kotlin/
+*.hprof
+
+# --- Keystore / signing (绝不入库) ---
+*.jks
+*.keystore
+*.p12
+signing.properties
+keystore.properties
+
+# --- IDE ---
+.vscode/
+*.swp
+*.swo
+
+# --- OS ---
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# --- Logs / temp ---
+*.log
+/tmp/
+/temp/
