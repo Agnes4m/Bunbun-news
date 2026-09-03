@@ -20,4 +20,12 @@
     <string name="add_feed">添加订阅</string>
     <string name="import_opml">导入 OPML</string>
     <string name="subscribe_event">订阅此事件</string>
+
+    <!-- 关于页（AboutScreen）—— 直接改这里就能改关于页展示内容 -->
+    <!-- about_tagline: 一句话介绍 app -->
+    <string name="about_tagline">一个轻量级 RSS 新闻聚合器</string>
+    <!-- about_license: 协议声明 -->
+    <string name="about_license">Apache License 2.0</string>
+    <!-- about_credits: 鸣谢的开源项目/作者，用顿号或逗号分隔 -->
+    <string name="about_credits">鸣谢：Read You、FeedFlow、Miniflux、ROME、kxml2</string>
 </resources>

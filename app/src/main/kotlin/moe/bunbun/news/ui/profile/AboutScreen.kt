@@ -59,21 +59,16 @@ fun AboutScreen(onBack: () -> Unit) {
             )
             Spacer(Modifier.height(16.dp))
             Text(
-                "一个轻量级 RSS 新闻聚合器",
+                stringResource(R.string.about_tagline),
                 style = MaterialTheme.typography.bodyLarge,
-            )
-            Text(
-                "射命丸文（东方 Project 鸦天狗记者）做吉祥物",
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
             Spacer(Modifier.height(16.dp))
             Text(
-                "Apache License 2.0",
+                stringResource(R.string.about_license),
                 style = MaterialTheme.typography.bodySmall,
             )
             Text(
-                "鸣谢：Read You、FeedFlow、Miniflux、ROME、kxml2",
+                stringResource(R.string.about_credits),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
