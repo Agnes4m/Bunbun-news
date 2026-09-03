@@ -1,7 +1,22 @@
 <resources>
     <string name="app_name">文闻 Bunbun News</string>
-    <string name="tab_timeline">时间线</string>
-    <string name="tab_feeds">订阅</string>
-    <string name="tab_starred">收藏</string>
-    <string name="tab_settings">设置</string>
+
+    <!-- 底部导航 4 Tab -->
+    <string name="tab_home">首页</string>
+    <string name="tab_search">搜索</string>
+    <string name="tab_subscriptions">订阅</string>
+    <string name="tab_profile">个人</string>
+
+    <!-- 个人页内子标题 -->
+    <string name="profile_history">历史记录</string>
+    <string name="profile_starred">收藏</string>
+    <string name="profile_manage_feeds">订阅管理</string>
+    <string name="profile_settings">设置</string>
+    <string name="profile_about">关于</string>
+
+    <!-- 通用 -->
+    <string name="empty_placeholder">空空如也</string>
+    <string name="add_feed">添加订阅</string>
+    <string name="import_opml">导入 OPML</string>
+    <string name="subscribe_event">订阅此事件</string>
 </resources>
