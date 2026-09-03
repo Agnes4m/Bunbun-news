@@ -50,6 +50,12 @@ class SyncFeedsUseCase @Inject constructor(
             previousLastModified = feed.lastModified,
         )
 
+        // 拉取失败（4xx/5xx/网络）
+        if (result.error != null) {
+            Timber.tag("Sync").w("fetch failed for ${feed.id}: ${result.error}")
+            return SyncStats(feed.id, fetched = false, newArticles = 0, skipped = false, error = result.error)
+        }
+
         // 304 Not Modified — 跳过
         if (result.notModified || result.body == null) {
             feedRepository.upsert(feed.copy(lastSyncAt = Instant.now()))
@@ -65,6 +71,8 @@ class SyncFeedsUseCase @Inject constructor(
         }
 
         val success = parseResult as FeedParseResult.Success
+
+        Timber.tag("Sync").d("Parsed ${success.articles.size} articles from ${feed.title}")
 
         val feedIdForArticles = feed.id
         val domainArticles = success.articles.map { parsed ->
@@ -86,7 +94,10 @@ class SyncFeedsUseCase @Inject constructor(
             )
         }
 
+        Timber.tag("Sync").d("Mapped ${domainArticles.size} domain articles, IDs: ${domainArticles.take(3).map { it.id }}")
+
         val inserted = articleRepository.upsertAll(domainArticles)
+        Timber.tag("Sync").i("Inserted $inserted/${domainArticles.size} articles for ${feed.title} (sample IDs: ${domainArticles.take(2).map { it.id }})")
 
         // 更新 Feed 元数据（etag / lastModified / lastSyncAt）
         feedRepository.upsert(

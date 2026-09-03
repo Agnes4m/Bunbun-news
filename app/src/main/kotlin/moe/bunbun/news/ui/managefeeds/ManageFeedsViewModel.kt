@@ -44,8 +44,8 @@ class ManageFeedsViewModel @Inject constructor(
         _isAdding.value = false
     }
 
-    /** 用户输入 URL 和标题（标题可空，自动从 URL 推断） */
-    fun addFeed(url: String, title: String?) {
+    /** 用户输入 URL 和标题（标题可空，自动从 URL 推断）；category 供「分类」Tab 过滤 */
+    fun addFeed(url: String, title: String?, category: String? = null) {
         val finalTitle = title?.takeIf { it.isNotBlank() } ?: url
         val id = "feed-${url.hashCode()}"
         viewModelScope.launch {
@@ -56,7 +56,7 @@ class ManageFeedsViewModel @Inject constructor(
                     title = finalTitle,
                     siteUrl = null,
                     iconUrl = null,
-                    category = null,
+                    category = category,
                     lastSyncAt = null,
                     etag = null,
                     lastModified = null,
@@ -80,7 +80,7 @@ class ManageFeedsViewModel @Inject constructor(
         val feeds = opmlImporter.extractFeedUrls(content.byteInputStream())
         viewModelScope.launch {
             feeds.forEach { feed ->
-                addFeed(feed.url, feed.title)
+                addFeed(feed.url, feed.title, feed.category)
             }
         }
     }

@@ -29,6 +29,9 @@ class BunbunApp : Application(), Configuration.Provider {
         }
         // 注册周期同步任务（首次启动后开始，30 分钟一次）
         workScheduler.schedulePeriodicSync()
+        // 启动时立刻拉一次：用户开 app 就能看到最新内容
+        // （OneTime work REPLACE 策略，多次启动不会堆积）
+        workScheduler.requestImmediateSync()
     }
 
     private val isDebugBuild: Boolean

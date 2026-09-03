@@ -14,7 +14,7 @@ interface ArticleDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun upsert(article: ArticleEntity)
 
-    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertAllIfAbsent(articles: List<ArticleEntity>): List<Long>
 
     @Query("UPDATE articles SET isRead = :isRead WHERE id = :id")
@@ -96,4 +96,27 @@ interface ArticleDao {
 
     @Query("SELECT * FROM articles WHERE id IN (:ids)")
     suspend fun getByIds(ids: List<String>): List<ArticleEntity>
+
+    @Query("SELECT COUNT(*) FROM articles")
+    suspend fun countAll(): Int
+
+    @Query("SELECT COUNT(*) FROM articles WHERE id = :id")
+    suspend fun exists(id: String): Int
+
+    /** 按 Feed 分类查询文章 —— CategoriesScreen 用；无分类的 feed 归入「综合」 */
+    @Query(
+        """
+        SELECT a.* FROM articles a
+        INNER JOIN feeds f ON f.id = a.feedId
+        WHERE COALESCE(f.category, '综合') = :category
+          AND a.publishedAt IS NOT NULL
+        ORDER BY a.publishedAt DESC
+        LIMIT :limit
+        """
+    )
+    fun observeByCategory(category: String, limit: Int = 300): Flow<List<ArticleEntity>>
+
+    /** 全部分类（含 NULL 归为"综合"）—— CategoriesScreen 的 chips 用 */
+    @Query("SELECT DISTINCT COALESCE(category, '综合') AS category FROM feeds")
+    suspend fun getCategories(): List<String>
 }

@@ -217,9 +217,9 @@ private fun sampleOpmlContent(): String = """
 <opml version="2.0">
   <head><title>Bunbun 示例订阅</title></head>
   <body>
-    <outline type="rss" text="Solidot" title="Solidot" xmlUrl="https://www.solidot.org/index.rss"/>
-    <outline type="rss" text="少数派" title="少数派" xmlUrl="https://sspai.com/feed"/>
-    <outline type="rss" text="阮一峰的网络日志" title="阮一峰的网络日志" xmlUrl="https://www.ruanyifeng.com/blog/atom.xml"/>
+    <outline type="rss" text="少数派" title="少数派" category="科技" xmlUrl="https://sspai.com/feed"/>
+    <outline type="rss" text="阮一峰的网络日志" title="阮一峰的网络日志" category="科技" xmlUrl="https://www.ruanyifeng.com/blog/atom.xml"/>
+    <outline type="atom" text="Hacker News" title="Hacker News" category="科技" xmlUrl="https://hnrss.org/frontpage"/>
   </body>
 </opml>
 """.trimIndent()

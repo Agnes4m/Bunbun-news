@@ -1,18 +1,18 @@
 package moe.bunbun.news.data.db
 
 import androidx.room.Dao
-import androidx.room.Insert
-import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import androidx.room.Upsert
 import androidx.room.Update
 import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface FeedDao {
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    // 注意：不能用 REPLACE —— 它会删除旧行再插入，触发 articles 的 ON DELETE CASCADE 清空文章
+    @Upsert
     suspend fun upsert(feed: FeedEntity)
 
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    @Upsert
     suspend fun upsertAll(feeds: List<FeedEntity>)
 
     @Update

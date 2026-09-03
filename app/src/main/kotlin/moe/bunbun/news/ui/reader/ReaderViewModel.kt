@@ -1,6 +1,5 @@
 package moe.bunbun.news.ui.reader
 
-import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -8,6 +7,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import moe.bunbun.news.data.repo.ArticleRepository
@@ -23,25 +24,31 @@ data class ReaderUiState(
     val isEventSubscribed: Boolean = false,
 )
 
+/**
+ * 阅读器 ViewModel。
+ * 注意：本项目是自定义导航（没有 Navigation-compose），
+ * articleId 由 ReaderScreen 通过 [setArticleId] 显式传入，
+ * 不能用 SavedStateHandle["articleId"]（自定义导航没有这个参数）。
+ */
 @HiltViewModel
 class ReaderViewModel @Inject constructor(
     private val articleRepository: ArticleRepository,
     private val historyRepository: HistoryRepository,
     private val subscriptionRepository: SubscriptionRepository,
-    savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
 
-    private val articleId: String = checkNotNull(savedStateHandle["articleId"]) {
-        "ReaderViewModel requires 'articleId' navigation arg"
-    }
+    private val articleIdFlow = MutableStateFlow<String?>(null)
+
+    val articleState: StateFlow<Article?> = articleIdFlow
+        .flatMapLatest { id -> id?.let { articleRepository.observeById(it) } ?: flowOf(null) }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
 
     private val _uiState = MutableStateFlow(ReaderUiState())
     val uiState: StateFlow<ReaderUiState> = _uiState.asStateFlow()
 
-    val articleState: StateFlow<Article?> = articleRepository.observeById(articleId)
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
-
-    init {
+    fun setArticleId(articleId: String) {
+        if (articleIdFlow.value == articleId) return
+        articleIdFlow.value = articleId
         // 打开即标记已读 + 写历史
         viewModelScope.launch {
             articleRepository.markRead(articleId, true)
@@ -62,6 +69,7 @@ class ReaderViewModel @Inject constructor(
     }
 
     fun toggleEventSubscription() {
+        val articleId = articleIdFlow.value ?: return
         viewModelScope.launch {
             val article = articleRepository.getById(articleId) ?: return@launch
             val clusterId = article.clusterId ?: return@launch
@@ -75,6 +83,7 @@ class ReaderViewModel @Inject constructor(
     }
 
     fun toggleStar() {
+        val articleId = articleIdFlow.value ?: return
         viewModelScope.launch {
             articleRepository.toggleStar(articleId)
         }

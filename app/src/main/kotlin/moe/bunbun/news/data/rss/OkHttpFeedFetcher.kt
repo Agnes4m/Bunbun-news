@@ -35,15 +35,41 @@ class OkHttpFeedFetcher @Inject constructor(
 
         val request = requestBuilder.build()
 
-        client.newCall(request).execute().use { response ->
-            val notModified = response.code == 304
-
+        try {
+            client.newCall(request).execute().use { response ->
+                val notModified = response.code == 304
+                if (notModified) {
+                    return@withContext FeedFetchResult(
+                        body = null,
+                        etag = response.header("ETag"),
+                        lastModified = response.header("Last-Modified"),
+                        contentType = response.header("Content-Type"),
+                        notModified = true,
+                    )
+                }
+                if (!response.isSuccessful) {
+                    return@withContext FeedFetchResult(
+                        body = null,
+                        etag = response.header("ETag"),
+                        lastModified = response.header("Last-Modified"),
+                        contentType = response.header("Content-Type"),
+                        error = "HTTP ${response.code} ${response.message}",
+                    )
+                }
+                FeedFetchResult(
+                    body = response.body?.string(),
+                    etag = response.header("ETag"),
+                    lastModified = response.header("Last-Modified"),
+                    contentType = response.header("Content-Type"),
+                )
+            }
+        } catch (t: Throwable) {
             FeedFetchResult(
-                body = if (notModified) null else response.body?.string(),
-                etag = response.header("ETag"),
-                lastModified = response.header("Last-Modified"),
-                contentType = response.header("Content-Type"),
-                notModified = notModified,
+                body = null,
+                etag = null,
+                lastModified = null,
+                contentType = null,
+                error = t.message ?: t::class.java.simpleName,
             )
         }
     }

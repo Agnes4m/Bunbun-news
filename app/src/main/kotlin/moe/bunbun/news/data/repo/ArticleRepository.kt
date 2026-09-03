@@ -17,11 +17,15 @@ interface ArticleRepository {
     fun observeByCluster(clusterId: String): Flow<List<Article>>
     fun observeById(id: String): Flow<Article?>
     fun search(query: String, limit: Int = 100): Flow<List<Article>>
+    fun observeByCategory(category: String, limit: Int = 300): Flow<List<Article>>
+    suspend fun getCategories(): List<String>
 
     suspend fun getById(id: String): Article?
     suspend fun getByIds(ids: List<String>): List<Article>
     suspend fun upsert(article: Article): Boolean
     suspend fun upsertAll(articles: List<Article>): Int
+    suspend fun countAll(): Int
+    suspend fun exists(id: String): Boolean
     suspend fun markRead(id: String, isRead: Boolean)
     suspend fun toggleStar(id: String)
     suspend fun setClusterId(id: String, clusterId: String)
@@ -50,6 +54,11 @@ class ArticleRepositoryImpl @Inject constructor(
     override fun search(query: String, limit: Int): Flow<List<Article>> =
         dao.search(query, limit).map { entities -> entities.map { it.toDomain() } }
 
+    override fun observeByCategory(category: String, limit: Int): Flow<List<Article>> =
+        dao.observeByCategory(category, limit).map { entities -> entities.map { it.toDomain() } }
+
+    override suspend fun getCategories(): List<String> = dao.getCategories()
+
     override suspend fun getById(id: String): Article? =
         dao.getById(id)?.toDomain()
 
@@ -61,6 +70,10 @@ class ArticleRepositoryImpl @Inject constructor(
 
     override suspend fun upsertAll(articles: List<Article>): Int =
         dao.insertAllIfAbsent(articles.map(Article::toEntity)).count { it != -1L }
+
+    override suspend fun countAll(): Int = dao.countAll()
+
+    override suspend fun exists(id: String): Boolean = dao.exists(id) > 0
 
     override suspend fun markRead(id: String, isRead: Boolean) {
         dao.setRead(id, isRead)

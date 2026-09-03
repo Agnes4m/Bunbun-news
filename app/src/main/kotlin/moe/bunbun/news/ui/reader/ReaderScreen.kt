@@ -24,6 +24,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -44,9 +45,10 @@ fun ReaderScreen(
     modifier: Modifier = Modifier,
     onOpenInBrowser: (String) -> Unit = {},
 ) {
-    val viewModel: ReaderViewModel = hiltViewModel()
+    val viewModel: ReaderViewModel = hiltViewModel(key = "reader-$articleId")
     val article by viewModel.articleState.collectAsState()
     val uiState by viewModel.uiState.collectAsState()
+    LaunchedEffect(articleId) { viewModel.setArticleId(articleId) }
 
     Scaffold(
         modifier = modifier,

@@ -3,6 +3,7 @@ package moe.bunbun.news.ui.nav
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Category
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.RssFeed
@@ -17,10 +18,12 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.activity.compose.BackHandler
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import moe.bunbun.news.R
+import moe.bunbun.news.ui.categories.CategoriesScreen
 import moe.bunbun.news.ui.home.HomeScreen
 import moe.bunbun.news.ui.managefeeds.ManageFeedsScreen
 import moe.bunbun.news.ui.profile.AboutScreen
@@ -39,6 +42,7 @@ private enum class TopDestination(
 ) {
     Home("home", R.string.tab_home, Icons.Filled.Home),
     Search("search", R.string.tab_search, Icons.Filled.Search),
+    Categories("categories", R.string.tab_categories, Icons.Filled.Category),
     Subscriptions("subscriptions", R.string.tab_subscriptions, Icons.Filled.RssFeed),
     Profile("profile", R.string.tab_profile, Icons.Filled.Person),
 }
@@ -53,6 +57,14 @@ fun ZixunNavHost(modifier: Modifier = Modifier) {
 
     val onArticleClick: (String) -> Unit = { id -> readingArticleId = id }
     val onBackToTab: () -> Unit = { subScreen = SubScreen.None }
+
+    // 返回键：阅读器 → 列表 → Tab（子页面）→ 退出（仅在可返回时拦截）
+    BackHandler(enabled = readingArticleId != null || subScreen != SubScreen.None) {
+        when {
+            readingArticleId != null -> readingArticleId = null
+            subScreen != SubScreen.None -> subScreen = SubScreen.None
+        }
+    }
 
     val showBottomBar = subScreen == SubScreen.None && readingArticleId == null
 
@@ -106,6 +118,10 @@ fun ZixunNavHost(modifier: Modifier = Modifier) {
                         modifier = modifier.fillMaxSize().padding(innerPadding),
                     )
                     TopDestination.Search -> SearchScreen(
+                        onArticleClick = onArticleClick,
+                        modifier = modifier.fillMaxSize().padding(innerPadding),
+                    )
+                    TopDestination.Categories -> CategoriesScreen(
                         onArticleClick = onArticleClick,
                         modifier = modifier.fillMaxSize().padding(innerPadding),
                     )

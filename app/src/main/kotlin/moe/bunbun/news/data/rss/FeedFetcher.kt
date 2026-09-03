@@ -2,8 +2,9 @@ package moe.bunbun.news.data.rss
 
 /**
  * OkHttp 拉取 RSS/Atom feed 的结果。
- * - body == null 表示 304 Not Modified（带 ETag 时）
- * - etag/lastModified 是服务端返回的最新值（写回 FeedEntity）
+ * - notModified = true 表示 304 Not Modified
+ * - error != null 表示拉取失败（4xx/5xx/网络错误）
+ * - body 仅在 2xx 时非空
  */
 data class FeedFetchResult(
     val body: String?,
@@ -11,6 +12,7 @@ data class FeedFetchResult(
     val lastModified: String?,
     val contentType: String?,
     val notModified: Boolean = false,
+    val error: String? = null,
 )
 
 interface FeedFetcher {

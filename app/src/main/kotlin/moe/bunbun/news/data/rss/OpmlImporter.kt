@@ -43,7 +43,8 @@ class OpmlImporter @Inject constructor() {
                         val type = parser.getAttributeValue(null, "type")
 
                         if (!url.isNullOrBlank() && (type == null || type.equals("rss", ignoreCase = true) || type.equals("atom", ignoreCase = true))) {
-                            feeds.add(OpmlFeed(title = title ?: url, url = url))
+                            val category = parser.getAttributeValue(null, "category")
+                            feeds.add(OpmlFeed(title = title ?: url, url = url, category = category))
                         }
                         // 跳过嵌套 outline（分类节点没有 xmlUrl）
                     }
@@ -57,4 +58,4 @@ class OpmlImporter @Inject constructor() {
     }
 }
 
-data class OpmlFeed(val title: String, val url: String)
+data class OpmlFeed(val title: String, val url: String, val category: String? = null)
