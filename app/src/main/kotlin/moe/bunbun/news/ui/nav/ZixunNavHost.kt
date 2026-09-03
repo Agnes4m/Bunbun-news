@@ -23,7 +23,11 @@ import androidx.compose.ui.res.stringResource
 import moe.bunbun.news.R
 import moe.bunbun.news.ui.home.HomeScreen
 import moe.bunbun.news.ui.managefeeds.ManageFeedsScreen
+import moe.bunbun.news.ui.profile.AboutScreen
+import moe.bunbun.news.ui.profile.HistoryListScreen
 import moe.bunbun.news.ui.profile.ProfileScreen
+import moe.bunbun.news.ui.profile.SettingsScreen
+import moe.bunbun.news.ui.profile.StarredListScreen
 import moe.bunbun.news.ui.reader.ReaderScreen
 import moe.bunbun.news.ui.search.SearchScreen
 import moe.bunbun.news.ui.subscriptions.SubscriptionsScreen
@@ -39,7 +43,7 @@ private enum class TopDestination(
     Profile("profile", R.string.tab_profile, Icons.Filled.Person),
 }
 
-private enum class SubScreen { ManageFeeds, None }
+private enum class SubScreen { None, ManageFeeds, History, Starred, Settings, About }
 
 @Composable
 fun ZixunNavHost(modifier: Modifier = Modifier) {
@@ -48,10 +52,13 @@ fun ZixunNavHost(modifier: Modifier = Modifier) {
     var readingArticleId by remember { mutableStateOf<String?>(null) }
 
     val onArticleClick: (String) -> Unit = { id -> readingArticleId = id }
+    val onBackToTab: () -> Unit = { subScreen = SubScreen.None }
+
+    val showBottomBar = subScreen == SubScreen.None && readingArticleId == null
 
     Scaffold(
         bottomBar = {
-            if (subScreen == SubScreen.None && readingArticleId == null) {
+            if (showBottomBar) {
                 NavigationBar {
                     TopDestination.entries.forEach { dest ->
                         NavigationBarItem(
@@ -71,28 +78,51 @@ fun ZixunNavHost(modifier: Modifier = Modifier) {
                 onBack = { readingArticleId = null },
                 modifier = modifier.fillMaxSize().padding(innerPadding),
             )
-            subScreen == SubScreen.ManageFeeds -> ManageFeedsScreen(
-                onBack = { subScreen = SubScreen.None },
-                modifier = modifier.fillMaxSize().padding(innerPadding),
-            )
-            else -> when (selected) {
-                TopDestination.Home -> HomeScreen(
+            else -> when (subScreen) {
+                SubScreen.ManageFeeds -> ManageFeedsScreen(
+                    onBack = onBackToTab,
+                    modifier = modifier.fillMaxSize().padding(innerPadding),
+                )
+                SubScreen.History -> HistoryListScreen(
+                    onBack = onBackToTab,
                     onArticleClick = onArticleClick,
                     modifier = modifier.fillMaxSize().padding(innerPadding),
                 )
-                TopDestination.Search -> SearchScreen(
+                SubScreen.Starred -> StarredListScreen(
+                    onBack = onBackToTab,
                     onArticleClick = onArticleClick,
                     modifier = modifier.fillMaxSize().padding(innerPadding),
                 )
-                TopDestination.Subscriptions -> SubscriptionsScreen(
-                    onNavigateToManageFeeds = { subScreen = SubScreen.ManageFeeds },
-                    onArticleClick = onArticleClick,
+                SubScreen.Settings -> SettingsScreen(
+                    onBack = onBackToTab,
                     modifier = modifier.fillMaxSize().padding(innerPadding),
                 )
-                TopDestination.Profile -> ProfileScreen(
-                    onNavigateToManageFeeds = { subScreen = SubScreen.ManageFeeds },
-                    modifier = modifier.fillMaxSize().padding(innerPadding),
+                SubScreen.About -> AboutScreen(
+                    onBack = onBackToTab,
                 )
+                SubScreen.None -> when (selected) {
+                    TopDestination.Home -> HomeScreen(
+                        onArticleClick = onArticleClick,
+                        modifier = modifier.fillMaxSize().padding(innerPadding),
+                    )
+                    TopDestination.Search -> SearchScreen(
+                        onArticleClick = onArticleClick,
+                        modifier = modifier.fillMaxSize().padding(innerPadding),
+                    )
+                    TopDestination.Subscriptions -> SubscriptionsScreen(
+                        onNavigateToManageFeeds = { subScreen = SubScreen.ManageFeeds },
+                        onArticleClick = onArticleClick,
+                        modifier = modifier.fillMaxSize().padding(innerPadding),
+                    )
+                    TopDestination.Profile -> ProfileScreen(
+                        onNavigateToManageFeeds = { subScreen = SubScreen.ManageFeeds },
+                        onNavigateToHistory = { subScreen = SubScreen.History },
+                        onNavigateToStarred = { subScreen = SubScreen.Starred },
+                        onNavigateToSettings = { subScreen = SubScreen.Settings },
+                        onNavigateToAbout = { subScreen = SubScreen.About },
+                        modifier = modifier.fillMaxSize().padding(innerPadding),
+                    )
+                }
             }
         }
     }

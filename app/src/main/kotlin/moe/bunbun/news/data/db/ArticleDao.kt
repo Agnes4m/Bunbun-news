@@ -4,7 +4,6 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
-import androidx.room.Transaction
 import kotlinx.coroutines.flow.Flow
 
 @Dao
@@ -95,7 +94,6 @@ interface ArticleDao {
     @Query("SELECT COUNT(*) FROM articles WHERE clusterId IS NULL")
     suspend fun countWithoutCluster(): Int
 
-    @Transaction
     @Query("SELECT * FROM articles WHERE id IN (:ids)")
     suspend fun getByIds(ids: List<String>): List<ArticleEntity>
 }

@@ -19,6 +19,7 @@ interface ArticleRepository {
     fun search(query: String, limit: Int = 100): Flow<List<Article>>
 
     suspend fun getById(id: String): Article?
+    suspend fun getByIds(ids: List<String>): List<Article>
     suspend fun upsert(article: Article): Boolean
     suspend fun upsertAll(articles: List<Article>): Int
     suspend fun markRead(id: String, isRead: Boolean)
@@ -51,6 +52,9 @@ class ArticleRepositoryImpl @Inject constructor(
 
     override suspend fun getById(id: String): Article? =
         dao.getById(id)?.toDomain()
+
+    override suspend fun getByIds(ids: List<String>): List<Article> =
+        dao.getByIds(ids).map { it.toDomain() }
 
     override suspend fun upsert(article: Article): Boolean =
         dao.insertIfAbsent(article.toEntity()) != -1L
