@@ -3,6 +3,10 @@
 # --- ZCode workspace metadata ---
 .zcode/
 
+# --- 装机截图（本地验证用，不入库）---
+/build-screenshots/
+build-screenshots/
+
 # --- Gradle ---
 .gradle/
 build/
