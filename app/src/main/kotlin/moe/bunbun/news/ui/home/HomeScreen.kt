@@ -1,4 +1,4 @@
-package moe.bunbun.news.ui.subscriptions
+package moe.bunbun.news.ui.home
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -8,10 +8,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.LocalFireDepartment
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -29,45 +28,40 @@ import moe.bunbun.news.ui.common.ArticleCard
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SubscriptionsScreen(
-    onNavigateToManageFeeds: () -> Unit,
+fun HomeScreen(
     onArticleClick: (String) -> Unit = {},
     modifier: Modifier = Modifier,
-    viewModel: SubscriptionsViewModel = hiltViewModel(),
+    viewModel: HomeViewModel = hiltViewModel(),
 ) {
-    val articles by viewModel.timeline.collectAsState()
+    val articles by viewModel.recentArticles.collectAsState()
 
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(stringResource(R.string.tab_subscriptions)) },
+                title = { Text(stringResource(R.string.tab_home)) },
                 actions = {
-                    IconButton(onClick = onNavigateToManageFeeds) {
-                        Icon(Icons.Filled.Settings, contentDescription = "管理订阅")
-                    }
+                    // 热度入口占位 —— v0.2 实装
+                    Icon(
+                        Icons.Filled.LocalFireDepartment,
+                        contentDescription = "热度（v0.2）",
+                        modifier = Modifier.padding(end = 16.dp),
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
                 },
             )
         },
     ) { padding ->
         Box(modifier = Modifier.fillMaxSize().padding(padding)) {
             if (articles.isEmpty()) {
-                EmptyHint(onManageFeeds = onNavigateToManageFeeds)
+                EmptyHome()
             } else {
-                Column {
-                    Text(
-                        "${articles.size} 篇已订内容（源 + 事件）",
-                        style = MaterialTheme.typography.labelMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp),
-                    )
-                    LazyColumn(verticalArrangement = Arrangement.spacedBy(0.dp)) {
-                        items(articles, key = { it.id }) { article ->
-                            ArticleCard(
-                                article = article,
-                                onClick = { onArticleClick(article.id) },
-                                onToggleStar = { viewModel.toggleStar(article.id) },
-                            )
-                        }
+                LazyColumn(verticalArrangement = Arrangement.spacedBy(0.dp)) {
+                    items(articles, key = { it.id }) { article ->
+                        ArticleCard(
+                            article = article,
+                            onClick = { onArticleClick(article.id) },
+                            onToggleStar = { viewModel.toggleStar(article.id) },
+                        )
                     }
                 }
             }
@@ -76,16 +70,16 @@ fun SubscriptionsScreen(
 }
 
 @Composable
-private fun EmptyHint(onManageFeeds: () -> Unit) {
+private fun EmptyHome() {
     Box(
-        modifier = Modifier.fillMaxSize().padding(24.dp),
+        modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.Center,
     ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            Text("📡", style = MaterialTheme.typography.headlineLarge)
-            Text("还没订内容", style = MaterialTheme.typography.titleMedium)
+            Text("📰", style = MaterialTheme.typography.headlineLarge)
+            Text("还没有文章", style = MaterialTheme.typography.titleMedium)
             Text(
-                "点击右上角 ⚙ 添加 RSS 源",
+                "去订阅页加几个 RSS 源吧",
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )

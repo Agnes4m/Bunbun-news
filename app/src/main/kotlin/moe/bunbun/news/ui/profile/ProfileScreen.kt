@@ -40,6 +40,7 @@ import moe.bunbun.news.R
 fun ProfileScreen(
     onNavigateToManageFeeds: () -> Unit,
     onNavigateToSettings: () -> Unit = {},
+    modifier: Modifier = Modifier,
 ) {
     Scaffold(
         topBar = {
