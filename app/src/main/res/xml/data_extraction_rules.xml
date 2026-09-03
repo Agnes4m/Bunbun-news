@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<data-extraction-rules>
+    <cloud-backup>
+        <!-- v0.1: 暂不备份 -->
+    </cloud-backup>
+    <device-transfer>
+        <!-- v0.1: 暂不转移 -->
+    </device-transfer>
+</data-extraction-rules>

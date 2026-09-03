@@ -83,7 +83,7 @@ Debug APK 输出在 `app/build/outputs/apk/debug/`，目标体积 < 5 MB。
 - **Kotlin 2.0** + **Jetpack Compose** + **Material 3**
 - **MVVM + UDF + Hilt** 依赖注入
 - **Room** 本地数据库 + **DataStore** 偏好
-- **Rome**（RSS/Atom/JSON Feed 解析）+ **Readability4J**（正文提取，v0.2）
+- **prof18/RSS-Parser**（RSS/Atom/RDF 解析，KMP 库）+ **Readability4J**（正文提取，v0.2）
 - **OkHttp + Retrofit** 网络层 · **WorkManager** 后台同步
 - **Coil** 图片加载 · **Navigation Compose** 导航
 

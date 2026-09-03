@@ -1,0 +1,22 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!-- 文闻 Logo: 报纸 + 羽扇 占位 -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M30,30 L78,30 L78,82 L30,82 Z" />
+    <path
+        android:fillColor="#00897B"
+        android:pathData="M34,36 L74,36 L74,40 L34,40 Z" />
+    <path
+        android:fillColor="#00897B"
+        android:pathData="M34,46 L74,46 L74,50 L34,50 Z" />
+    <path
+        android:fillColor="#00897B"
+        android:pathData="M34,56 L64,56 L64,60 L34,60 Z" />
+    <path
+        android:fillColor="#EF6C00"
+        android:pathData="M52,66 L60,66 L56,78 Z" />
+</vector>

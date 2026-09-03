@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">文闻 Bunbun News</string>
+    <string name="tab_timeline">时间线</string>
+    <string name="tab_feeds">订阅</string>
+    <string name="tab_starred">收藏</string>
+    <string name="tab_settings">设置</string>
+</resources>
