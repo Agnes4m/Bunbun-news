@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0"
+     xmlns:dc="http://purl.com.org/dc/elements/1.1/"
+     xmlns:content="http://purl.com.org/rss/1.0/modules/content/">
+  <channel>
+    <title>Sample Tech News</title>
+    <link>https://example.com</link>
+    <description>A sample RSS feed for testing</description>
+
+    <item>
+      <title>Tesla announces Q3 earnings beat</title>
+      <link>https://example.com/articles/tesla-q3-2026</link>
+      <guid isPermaLink="true">https://example.com/articles/tesla-q3-2026</guid>
+      <dc:creator>Jane Reporter</dc:creator>
+      <pubDate>Mon, 14 Sep 2026 09:00:00 GMT</pubDate>
+      <description><![CDATA[Tesla reported strong Q3 earnings...]]></description>
+      <content:encoded><![CDATA[<p>Full article body here.</p>]]></content:encoded>
+    </item>
+
+    <item>
+      <title>Apple unveils new iPhone</title>
+      <link>https://example.com/articles/apple-iphone-launch</link>
+      <guid>https://example.com/articles/apple-iphone-launch</guid>
+      <pubDate>Tue, 15 Sep 2026 10:30:00 GMT</pubDate>
+      <description>Apple announced a new iPhone model today.</description>
+    </item>
+
+    <item>
+      <title></title>
+      <link>https://example.com/articles/empty-title</link>
+      <description>This item should be skipped (empty title)</description>
+    </item>
+
+    <item>
+      <title>Some other news</title>
+      <link></link>
+      <description>Empty link, should be skipped</description>
+    </item>
+  </channel>
+</rss>

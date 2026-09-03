@@ -120,6 +120,7 @@ dependencies {
     testImplementation(libs.mockk)
     testImplementation(libs.turbine)
     testImplementation(libs.coroutines.test)
+    testImplementation(libs.kxml2)  // 提供纯 JVM 的 XmlPullParser（避开 Android 单元测试 mock）
 
     // Compose 调试工具（仅 debug）
     debugImplementation(libs.androidx.compose.ui.tooling)
