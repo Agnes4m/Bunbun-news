@@ -122,4 +122,54 @@ class UrlNormalizerTest {
         val garbage = "not a url at all"
         assertEquals(garbage, UrlNormalizer.normalize(garbage))
     }
+
+    // ===== v0.2 主题 B：URL 规范化升级（国内平台追踪参数） =====
+
+    @Test
+    fun `strips alibaba spm tracking param`() {
+        assertEquals(
+            "https://item.taobao.com/i123.htm?id=456",
+            UrlNormalizer.normalize("https://item.taobao.com/i123.htm?spm=2013.1.0.0.0&id=456"),
+        )
+    }
+
+    @Test
+    fun `strips alibaba spm subkey prefix`() {
+        assertEquals(
+            "https://detail.tmall.com/item.htm?id=1",
+            UrlNormalizer.normalize("https://detail.tmall.com/item.htm?spm_cat=123&spm_id=456&id=1"),
+        )
+    }
+
+    @Test
+    fun `strips share prefixed tracking params`() {
+        assertEquals(
+            "https://example.com/a",
+            UrlNormalizer.normalize("https://example.com/a?share_from=wechat&share_id=99"),
+        )
+    }
+
+    @Test
+    fun `strips wechat from and chksm`() {
+        assertEquals(
+            "https://mp.weixin.qq.com/s?__biz=MzA",
+            UrlNormalizer.normalize("https://mp.weixin.qq.com/s?from=timeline&chksm=abc&__biz=MzA"),
+        )
+    }
+
+    @Test
+    fun `strips bilibili seid`() {
+        assertEquals(
+            "https://bilibili.com/video/BV1xx?p=1",
+            UrlNormalizer.normalize("https://www.bilibili.com/video/BV1xx?seid=12345&p=1"),
+        )
+    }
+
+    @Test
+    fun `strips toutiao wid`() {
+        assertEquals(
+            "https://toutiao.com/a123?category=tech",
+            UrlNormalizer.normalize("https://www.toutiao.com/a123?wid=999&category=tech"),
+        )
+    }
 }
