@@ -34,7 +34,7 @@ class UserPreferences @Inject constructor(
     private val SYNC_INTERVAL = intPreferencesKey("sync_interval_minutes")
     private val FIRST_LAUNCH_DONE = booleanPreferencesKey("first_launch_done")
 
-    val darkMode: Flow<Boolean> = context.dataStore.data.map { it[DARK_MODE] ?: false }
+    val darkMode: Flow<Boolean?> = context.dataStore.data.map { it[DARK_MODE] }
 
     val syncInterval: Flow<SyncInterval> = context.dataStore.data.map {
         SyncInterval.fromMinutes((it[SYNC_INTERVAL] ?: 30).toLong())
@@ -42,8 +42,11 @@ class UserPreferences @Inject constructor(
 
     val firstLaunchDone: Flow<Boolean> = context.dataStore.data.map { it[FIRST_LAUNCH_DONE] ?: false }
 
-    suspend fun setDarkMode(enabled: Boolean) {
-        context.dataStore.edit { it[DARK_MODE] = enabled }
+    /** 设置深色模式偏好：null = 跟随系统；true = 强制深色；false = 强制浅色 */
+    suspend fun setDarkMode(enabled: Boolean?) {
+        context.dataStore.edit { prefs ->
+            if (enabled == null) prefs.remove(DARK_MODE) else prefs[DARK_MODE] = enabled
+        }
     }
 
     suspend fun setSyncInterval(interval: SyncInterval) {

@@ -32,16 +32,23 @@ private val DarkColors = darkColorScheme(
 
 @Composable
 fun BunbunNewsTheme(
-    darkTheme: Boolean = isSystemInDarkTheme(),
+    /**
+     * 深色模式偏好：
+     * - null = 跟随系统（[isSystemInDarkTheme]）
+     * - true = 强制深色
+     * - false = 强制浅色
+     */
+    darkTheme: Boolean? = null,
     dynamicColor: Boolean = true,
     content: @Composable () -> Unit,
 ) {
+    val useDark = darkTheme ?: isSystemInDarkTheme()
     val colorScheme = when {
         dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
             val context = LocalContext.current
-            if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
+            if (useDark) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
         }
-        darkTheme -> DarkColors
+        useDark -> DarkColors
         else -> LightColors
     }
 

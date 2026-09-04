@@ -15,7 +15,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
@@ -43,12 +42,13 @@ import javax.inject.Inject
 class SettingsViewModel @Inject constructor(
     private val prefs: UserPreferences,
 ) : ViewModel() {
-    val darkMode: StateFlow<Boolean> = prefs.darkMode
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), false)
+    /** null = 跟随系统；true = 强制深色；false = 强制浅色 */
+    val darkMode: StateFlow<Boolean?> = prefs.darkMode
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
     val syncInterval: StateFlow<SyncInterval> = prefs.syncInterval
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), SyncInterval.NORMAL)
 
-    fun setDarkMode(enabled: Boolean) {
+    fun setDarkMode(enabled: Boolean?) {
         viewModelScope.launch { prefs.setDarkMode(enabled) }
     }
 
@@ -85,13 +85,28 @@ fun SettingsScreen(
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             SectionHeader("外观")
-            SettingRow(
-                title = "深色模式",
-                subtitle = "切换 Material You 深色主题（v0.2 实装）",
-                trailing = {
-                    Switch(checked = darkMode, onCheckedChange = viewModel::setDarkMode)
-                },
-            )
+            // 三态主题：跟随系统 / 浅色 / 深色
+            ThemeOption.entries.forEach { option ->
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 4.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    RadioButton(
+                        selected = darkMode == option.darkValue,
+                        onClick = { viewModel.setDarkMode(option.darkValue) },
+                    )
+                    Column(modifier = Modifier.padding(start = 8.dp)) {
+                        Text(option.label, fontWeight = FontWeight.Medium)
+                        Text(
+                            option.description,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
+                }
+            }
             HorizontalDivider()
 
             SectionHeader("同步")
@@ -173,3 +188,20 @@ private fun SyncInterval.label(): String = when (this) {
 }
 
 private fun SyncInterval.description(): String = "${minutes} 分钟一次"
+
+/** 主题选项（v0.1.1 三态主题切换） */
+private enum class ThemeOption(
+    val label: String,
+    val description: String,
+    /**
+     * 写入 UserPreferences.darkMode 的值：
+     * - null = 跟随系统
+     * - true = 强制深色
+     * - false = 强制浅色
+     */
+    val darkValue: Boolean?,
+) {
+    FOLLOW_SYSTEM("跟随系统", "跟随 Android 系统深色设置", null),
+    LIGHT("浅色", "始终使用浅色主题", false),
+    DARK("深色", "始终使用深色主题（省电）", true),
+}
