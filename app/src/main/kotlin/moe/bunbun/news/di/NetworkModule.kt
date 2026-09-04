@@ -24,6 +24,20 @@ object NetworkModule {
         .readTimeout(20, TimeUnit.SECONDS)
         .writeTimeout(15, TimeUnit.SECONDS)
         .retryOnConnectionFailure(true)
+        // 部分源（如 Solidot、阮一峰、纽约时报中文等）会拒绝默认 UA，
+        // 用浏览器 UA 通过反爬首道筛选
+        .addInterceptor { chain ->
+            val request = chain.request().newBuilder()
+                .header(
+                    "User-Agent",
+                    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 " +
+                        "(KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36",
+                )
+                .header("Accept", "application/rss+xml, application/atom+xml, application/xml;q=0.9, */*;q=0.8")
+                .header("Accept-Language", "zh-CN,zh;q=0.9,en;q=0.8")
+                .build()
+            chain.proceed(request)
+        }
         .build()
 
     @Provides

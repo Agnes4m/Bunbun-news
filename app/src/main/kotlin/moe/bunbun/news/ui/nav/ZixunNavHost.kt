@@ -14,6 +14,7 @@ import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -22,10 +23,12 @@ import androidx.activity.compose.BackHandler
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
+import androidx.hilt.navigation.compose.hiltViewModel
 import moe.bunbun.news.R
 import moe.bunbun.news.ui.categories.CategoriesScreen
 import moe.bunbun.news.ui.home.HomeScreen
 import moe.bunbun.news.ui.managefeeds.ManageFeedsScreen
+import moe.bunbun.news.ui.onboarding.OnboardingScreen
 import moe.bunbun.news.ui.profile.AboutScreen
 import moe.bunbun.news.ui.profile.HistoryListScreen
 import moe.bunbun.news.ui.profile.ProfileScreen
@@ -51,6 +54,16 @@ private enum class SubScreen { None, ManageFeeds, History, Starred, Settings, Ab
 
 @Composable
 fun ZixunNavHost(modifier: Modifier = Modifier) {
+    val rootViewModel: MainViewModel = hiltViewModel()
+    val firstLaunchDone by rootViewModel.firstLaunchDone.collectAsState()
+
+    // 首次启动（firstLaunchDone 还没读到或为 false）显示 OnboardingScreen，
+    // 主界面在引导页导入完成 / 跳过后才接管。
+    if (firstLaunchDone != true) {
+        OnboardingScreen(modifier = modifier)
+        return
+    }
+
     var selected by remember { mutableStateOf(TopDestination.Home) }
     var subScreen by remember { mutableStateOf(SubScreen.None) }
     var readingArticleId by remember { mutableStateOf<String?>(null) }

@@ -42,6 +42,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import moe.bunbun.news.R
 import moe.bunbun.news.domain.model.Feed
+import moe.bunbun.news.ui.onboarding.SAMPLE_FEEDS_OPML
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -211,18 +212,8 @@ fun AddFeedDialog(
     )
 }
 
-/** v0.1：导入"示例 OPML"按钮直接用内置的几个高质量源（v0.2 接 SAF 文件选择器） */
-private fun sampleOpmlContent(): String = """
-<?xml version="1.0" encoding="UTF-8"?>
-<opml version="2.0">
-  <head><title>Bunbun 示例订阅</title></head>
-  <body>
-    <outline type="rss" text="少数派" title="少数派" category="科技" xmlUrl="https://sspai.com/feed"/>
-    <outline type="rss" text="阮一峰的网络日志" title="阮一峰的网络日志" category="科技" xmlUrl="https://www.ruanyifeng.com/blog/atom.xml"/>
-    <outline type="atom" text="Hacker News" title="Hacker News" category="科技" xmlUrl="https://hnrss.org/frontpage"/>
-  </body>
-</opml>
-""".trimIndent()
+/** v0.1 内置推荐订阅源 —— 复用 OnboardingScreen 的共享常量，保持单一数据源 */
+private fun sampleOpmlContent(): String = SAMPLE_FEEDS_OPML
 
 @Preview
 @Composable
