@@ -1,11 +1,13 @@
 pluginManagement {
     repositories {
-        maven("https://maven.aliyun.com/repository/google")
-        maven("https://maven.aliyun.com/repository/gradle-plugin")
-        maven("https://maven.aliyun.com/repository/public")
+        // 官方源优先（CI 环境对阿里云镜像可能超时）
+        gradlePluginPortal()
         google()
         mavenCentral()
-        gradlePluginPortal()
+        // 阿里云镜像作为国内加速
+        maven("https://maven.aliyun.com/repository/gradle-plugin")
+        maven("https://maven.aliyun.com/repository/google")
+        maven("https://maven.aliyun.com/repository/public")
     }
 }
 
