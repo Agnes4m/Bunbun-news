@@ -33,7 +33,7 @@ fun HomeScreen(
     modifier: Modifier = Modifier,
     viewModel: HomeViewModel = hiltViewModel(),
 ) {
-    val articles by viewModel.recentArticles.collectAsState()
+    val articles by viewModel.hotArticles.collectAsState()
 
     Scaffold(
         topBar = {
