@@ -46,4 +46,10 @@
     <string name="onboarding_importing">正在添加推荐源...</string>
     <!-- onboarding_importing_progress: 导入中（已有计数，%d 为已添加数） -->
     <string name="onboarding_importing_progress">已添加 %d 个，准备同步...</string>
+
+    <!-- 分类 Tab 日期分组（v0.2 新增） -->
+    <string name="categories_group_today">今天</string>
+    <string name="categories_group_yesterday">昨天</string>
+    <string name="categories_group_this_week">本周</string>
+    <string name="categories_group_earlier">更早</string>
 </resources>
