@@ -28,4 +28,22 @@
     <string name="about_license">Apache License 2.0</string>
     <!-- about_credits: 鸣谢的开源项目/作者，用顿号或逗号分隔 -->
     <string name="about_credits">鸣谢：Read You、FeedFlow、Miniflux、ROME、kxml2</string>
+
+    <!-- 引导页（OnboardingScreen）—— 可本地化直接改这里 -->
+    <!-- onboarding_app_name: 标题 -->
+    <string name="onboarding_app_name">文闻 Bunbun News</string>
+    <!-- onboarding_tagline: 副标题 -->
+    <string name="onboarding_tagline">一个轻量级 RSS 新闻聚合器</string>
+    <!-- onboarding_title: 推荐源卡片标题（%d 为推荐源数量） -->
+    <string name="onboarding_title">v0.1 精选 %d 个推荐订阅源</string>
+    <!-- onboarding_subtitle: 推荐源卡片副标题 -->
+    <string name="onboarding_subtitle">覆盖科技 / 国际 / 财经 / 社区</string>
+    <!-- onboarding_import_button: 主按钮（%d 为推荐源数量） -->
+    <string name="onboarding_import_button">一键导入 %d 个推荐源</string>
+    <!-- onboarding_skip: 跳过按钮 -->
+    <string name="onboarding_skip">跳过，稍后自己添加</string>
+    <!-- onboarding_importing: 导入中（初始） -->
+    <string name="onboarding_importing">正在添加推荐源...</string>
+    <!-- onboarding_importing_progress: 导入中（已有计数，%d 为已添加数） -->
+    <string name="onboarding_importing_progress">已添加 %d 个，准备同步...</string>
 </resources>

@@ -26,9 +26,11 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import moe.bunbun.news.R
 
 /**
  * 首次启动引导页：
@@ -75,12 +77,12 @@ fun OnboardingScreen(
             }
             Spacer(Modifier.height(12.dp))
             Text(
-                "文闻 Bunbun News",
+                stringResource(R.string.onboarding_app_name),
                 style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.SemiBold,
             )
             Text(
-                "一个轻量级 RSS 新闻聚合器",
+                stringResource(R.string.onboarding_tagline),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
@@ -96,12 +98,12 @@ fun OnboardingScreen(
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
                     Text(
-                        "v0.1 精选 ${SAMPLE_FEED_NAMES.size} 个推荐订阅源",
+                        stringResource(R.string.onboarding_title, SAMPLE_FEED_NAMES.size),
                         style = MaterialTheme.typography.titleSmall,
                         fontWeight = FontWeight.SemiBold,
                     )
                     Text(
-                        "覆盖科技 / 国际 / 财经 / 社区",
+                        stringResource(R.string.onboarding_subtitle),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
@@ -142,7 +144,11 @@ fun OnboardingScreen(
                         strokeWidth = 2.dp,
                     )
                     Text(
-                        if (importedCount > 0) "已添加 $importedCount 个，准备同步..." else "正在添加推荐源...",
+                        if (importedCount > 0) {
+                            stringResource(R.string.onboarding_importing_progress, importedCount)
+                        } else {
+                            stringResource(R.string.onboarding_importing)
+                        },
                         style = MaterialTheme.typography.bodyMedium,
                     )
                 }
@@ -151,14 +157,14 @@ fun OnboardingScreen(
                     onClick = { viewModel.importSampleFeeds(SAMPLE_FEEDS_OPML) },
                     modifier = Modifier.fillMaxWidth(),
                 ) {
-                    Text("一键导入 ${SAMPLE_FEED_NAMES.size} 个推荐源")
+                    Text(stringResource(R.string.onboarding_import_button, SAMPLE_FEED_NAMES.size))
                 }
                 Spacer(Modifier.height(4.dp))
                 TextButton(
                     onClick = { viewModel.skip() },
                     modifier = Modifier.fillMaxWidth(),
                 ) {
-                    Text("跳过，稍后自己添加")
+                    Text(stringResource(R.string.onboarding_skip))
                 }
             }
 
