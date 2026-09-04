@@ -15,6 +15,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
@@ -35,6 +36,7 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import moe.bunbun.news.R
 import moe.bunbun.news.data.prefs.SyncInterval
+import moe.bunbun.news.data.prefs.ThemeMode
 import moe.bunbun.news.data.prefs.UserPreferences
 import javax.inject.Inject
 
@@ -42,14 +44,20 @@ import javax.inject.Inject
 class SettingsViewModel @Inject constructor(
     private val prefs: UserPreferences,
 ) : ViewModel() {
-    /** null = 跟随系统；true = 强制深色；false = 强制浅色 */
-    val darkMode: StateFlow<Boolean?> = prefs.darkMode
+    /** null = 跟随系统；LIGHT/DARK/EYE_CARE 三态 */
+    val themeMode: StateFlow<ThemeMode?> = prefs.themeMode
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
+    val dynamicColor: StateFlow<Boolean> = prefs.dynamicColor
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), true)
     val syncInterval: StateFlow<SyncInterval> = prefs.syncInterval
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), SyncInterval.NORMAL)
 
-    fun setDarkMode(enabled: Boolean?) {
-        viewModelScope.launch { prefs.setDarkMode(enabled) }
+    fun setThemeMode(mode: ThemeMode?) {
+        viewModelScope.launch { prefs.setThemeMode(mode) }
+    }
+
+    fun setDynamicColor(enabled: Boolean) {
+        viewModelScope.launch { prefs.setDynamicColor(enabled) }
     }
 
     fun setSyncInterval(interval: SyncInterval) {
@@ -64,7 +72,8 @@ fun SettingsScreen(
     modifier: Modifier = Modifier,
     viewModel: SettingsViewModel = hiltViewModel(),
 ) {
-    val darkMode by viewModel.darkMode.collectAsState()
+    val themeMode by viewModel.themeMode.collectAsState()
+    val dynamicColor by viewModel.dynamicColor.collectAsState()
     val syncInterval by viewModel.syncInterval.collectAsState()
 
     Scaffold(
@@ -85,7 +94,7 @@ fun SettingsScreen(
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             SectionHeader("外观")
-            // 三态主题：跟随系统 / 浅色 / 深色
+            // 四态主题：跟随系统 / 浅色 / 深色 / 护眼（v0.2）
             ThemeOption.entries.forEach { option ->
                 Row(
                     modifier = Modifier
@@ -94,8 +103,8 @@ fun SettingsScreen(
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     RadioButton(
-                        selected = darkMode == option.darkValue,
-                        onClick = { viewModel.setDarkMode(option.darkValue) },
+                        selected = themeMode == option.themeMode,
+                        onClick = { viewModel.setThemeMode(option.themeMode) },
                     )
                     Column(modifier = Modifier.padding(start = 8.dp)) {
                         Text(option.label, fontWeight = FontWeight.Medium)
@@ -106,6 +115,26 @@ fun SettingsScreen(
                         )
                     }
                 }
+            }
+            // Material You 动态配色开关
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 4.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Column(modifier = Modifier.weight(1f)) {
+                    Text("Material You 动态配色", fontWeight = FontWeight.Medium)
+                    Text(
+                        "Android 12+ 取壁纸主色；护眼主题下忽略",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+                Switch(
+                    checked = dynamicColor,
+                    onCheckedChange = viewModel::setDynamicColor,
+                )
             }
             HorizontalDivider()
 
@@ -189,19 +218,15 @@ private fun SyncInterval.label(): String = when (this) {
 
 private fun SyncInterval.description(): String = "${minutes} 分钟一次"
 
-/** 主题选项（v0.1.1 三态主题切换） */
+/** 主题选项（v0.2 四态：跟随/浅/深/护眼） */
 private enum class ThemeOption(
     val label: String,
     val description: String,
-    /**
-     * 写入 UserPreferences.darkMode 的值：
-     * - null = 跟随系统
-     * - true = 强制深色
-     * - false = 强制浅色
-     */
-    val darkValue: Boolean?,
+    /** 写入 UserPreferences.themeMode 的值（null = 跟随系统） */
+    val themeMode: ThemeMode?,
 ) {
     FOLLOW_SYSTEM("跟随系统", "跟随 Android 系统深色设置", null),
-    LIGHT("浅色", "始终使用浅色主题", false),
-    DARK("深色", "始终使用深色主题（省电）", true),
+    LIGHT("浅色", "始终使用浅色主题", ThemeMode.LIGHT),
+    DARK("深色", "始终使用深色主题（省电）", ThemeMode.DARK),
+    EYE_CARE("护眼", "米黄底深棕字，夜间阅读舒适", ThemeMode.EYE_CARE),
 }

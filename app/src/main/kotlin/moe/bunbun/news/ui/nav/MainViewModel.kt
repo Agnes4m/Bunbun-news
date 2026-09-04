@@ -13,8 +13,9 @@ import javax.inject.Inject
  * 主导航根 ViewModel。
  *
  * - [firstLaunchDone]：是否已完成首次启动引导；未完成时显示 [OnboardingScreen]
- * - [darkMode]：用户主题偏好（null=跟随系统 / true=强制深色 / false=强制浅色）；
+ * - [themeMode]：用户主题偏好（null=跟随系统 / ThemeMode.LIGHT/DARK/EYE_CARE）；
  *   由 [MainActivity] 订阅并传入 [BunbunNewsTheme]，切换立刻生效
+ * - [dynamicColor]：是否启用 Material You 动态配色（Android 12+ 有效）
  */
 @HiltViewModel
 class MainViewModel @Inject constructor(
@@ -24,6 +25,9 @@ class MainViewModel @Inject constructor(
     val firstLaunchDone: StateFlow<Boolean?> = userPreferences.firstLaunchDone
         .stateIn(viewModelScope, SharingStarted.Eagerly, null)
 
-    val darkMode: StateFlow<Boolean?> = userPreferences.darkMode
+    val themeMode: StateFlow<moe.bunbun.news.data.prefs.ThemeMode?> = userPreferences.themeMode
         .stateIn(viewModelScope, SharingStarted.Eagerly, null)
+
+    val dynamicColor: StateFlow<Boolean> = userPreferences.dynamicColor
+        .stateIn(viewModelScope, SharingStarted.Eagerly, true)
 }

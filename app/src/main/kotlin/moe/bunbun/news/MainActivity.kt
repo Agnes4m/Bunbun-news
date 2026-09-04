@@ -27,10 +27,11 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            // 订阅 UserPreferences.darkMode 并喂给 BunbunNewsTheme，
-            // 让用户在 Settings 切深色时 UI 立刻变色（M8 遗留 bug 修复）
-            val darkMode by viewModel.darkMode.collectAsState()
-            BunbunNewsTheme(darkTheme = darkMode) {
+            // 订阅 UserPreferences 主题相关字段，喂给 BunbunNewsTheme，
+            // 让用户在 Settings 切换主题时 UI 立刻变色（v0.1.1 修复 → v0.2 扩展为 4 态）
+            val themeMode by viewModel.themeMode.collectAsState()
+            val dynamicColor by viewModel.dynamicColor.collectAsState()
+            BunbunNewsTheme(themeMode = themeMode, dynamicColor = dynamicColor) {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
                     ZixunNavHost(modifier = Modifier.padding(innerPadding))
                 }
