@@ -29,6 +29,7 @@ datastore = "1.1.1"
 # 网络
 okhttp = "4.12.0"
 retrofit = "2.11.0"
+gson = "2.11.0"
 
 # RSS 解析（prof18/RSS-Parser: KMP 库，专为 Android 设计，无依赖冲突）
 rssParser = "6.0.10"
@@ -89,6 +90,8 @@ okhttp = { group = "com.squareup.okhttp3", name = "okhttp", version.ref = "okhtt
 okhttp-logging = { group = "com.squareup.okhttp3", name = "logging-interceptor", version.ref = "okhttp" }
 retrofit = { group = "com.squareup.retrofit2", name = "retrofit", version.ref = "retrofit" }
 retrofit-converter-scalars = { group = "com.squareup.retrofit2", name = "converter-scalars", version.ref = "retrofit" }
+retrofit-converter-gson = { group = "com.squareup.retrofit2", name = "converter-gson", version.ref = "retrofit" }
+gson = { group = "com.google.code.gson", name = "gson", version.ref = "gson" }
 
 # RSS 解析（prof18/RSS-Parser: KMP 库，专为 Android 设计）
 rss-parser = { group = "com.prof18.rssparser", name = "rssparser", version.ref = "rssParser" }

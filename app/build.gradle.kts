@@ -100,6 +100,7 @@ dependencies {
     implementation(libs.okhttp.logging)
     implementation(libs.retrofit)
     implementation(libs.retrofit.converter.scalars)
+    implementation(libs.retrofit.converter.gson)
 
     // RSS 解析（prof18/RSS-Parser）
     implementation(libs.rss.parser)
