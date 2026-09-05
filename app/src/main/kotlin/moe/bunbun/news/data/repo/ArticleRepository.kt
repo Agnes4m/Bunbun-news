@@ -17,6 +17,11 @@ interface ArticleRepository {
     fun observeByCluster(clusterId: String): Flow<List<Article>>
     fun observeById(id: String): Flow<Article?>
     fun search(query: String, limit: Int = 100): Flow<List<Article>>
+    /**
+     * FTS4 全文搜索。`:ftsQuery` 已是合法 MATCH 串（由 FtsQueryBuilder 构造）。
+     * 空串查询返回空列表。
+     */
+    fun searchFts(ftsQuery: String, limit: Int = 100): Flow<List<Article>>
     fun observeByCategory(category: String, limit: Int = 300): Flow<List<Article>>
     suspend fun getCategories(): List<String>
 
@@ -53,6 +58,11 @@ class ArticleRepositoryImpl @Inject constructor(
 
     override fun search(query: String, limit: Int): Flow<List<Article>> =
         dao.search(query, limit).map { entities -> entities.map { it.toDomain() } }
+
+    override fun searchFts(ftsQuery: String, limit: Int): Flow<List<Article>> {
+        if (ftsQuery.isBlank()) return kotlinx.coroutines.flow.flowOf(emptyList())
+        return dao.searchFts(ftsQuery, limit).map { entities -> entities.map { it.toDomain() } }
+    }
 
     override fun observeByCategory(category: String, limit: Int): Flow<List<Article>> =
         dao.observeByCategory(category, limit).map { entities -> entities.map { it.toDomain() } }

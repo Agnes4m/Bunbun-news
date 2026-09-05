@@ -13,6 +13,7 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import moe.bunbun.news.data.db.FtsQueryBuilder
 import moe.bunbun.news.data.repo.ArticleRepository
 import moe.bunbun.news.domain.model.Article
 import javax.inject.Inject
@@ -29,8 +30,9 @@ class SearchViewModel @Inject constructor(
     val results: StateFlow<List<Article>> = _query
         .debounce(300)  // 300ms 防抖
         .flatMapLatest { q ->
-            if (q.isBlank()) flowOf(emptyList())
-            else articleRepository.search(q, limit = 100)
+            val ftsQuery = FtsQueryBuilder.build(q)
+            if (ftsQuery.isBlank()) flowOf(emptyList())
+            else articleRepository.searchFts(ftsQuery, limit = 100)
         }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 

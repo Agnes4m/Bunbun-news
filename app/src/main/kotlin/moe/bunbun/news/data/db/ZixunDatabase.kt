@@ -7,10 +7,11 @@ import androidx.room.RoomDatabase
     entities = [
         FeedEntity::class,
         ArticleEntity::class,
+        ArticleFtsEntity::class,
         SubscriptionEntity::class,
         HistoryEntity::class,
     ],
-    version = 1,
+    version = 2,
     exportSchema = true,
 )
 abstract class ZixunDatabase : RoomDatabase() {

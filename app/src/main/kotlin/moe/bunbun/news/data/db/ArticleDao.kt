@@ -88,6 +88,23 @@ interface ArticleDao {
     )
     fun search(query: String, limit: Int = 100): Flow<List<ArticleEntity>>
 
+    /**
+     * FTS4 全文搜索。`:ftsQuery` 应由调用方构造：每个 token 加 `*` 后缀做前缀匹配，
+     * 空格分隔；含空格的短语用双引号包住。
+     *
+     * 实现走 FTS 索引取 rowid，与原始 articles 表 JOIN 拿全字段。
+     */
+    @Query(
+        """
+        SELECT a.* FROM articles a
+        INNER JOIN articles_fts f ON f.rowid = a.rowid
+        WHERE articles_fts MATCH :ftsQuery
+        ORDER BY a.publishedAt DESC
+        LIMIT :limit
+        """
+    )
+    fun searchFts(ftsQuery: String, limit: Int = 100): Flow<List<ArticleEntity>>
+
     @Query("UPDATE articles SET clusterId = :clusterId WHERE id = :id")
     suspend fun setClusterId(id: String, clusterId: String)
 
