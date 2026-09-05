@@ -56,11 +56,12 @@ fun HomeScreen(
                 EmptyHome()
             } else {
                 LazyColumn(verticalArrangement = Arrangement.spacedBy(0.dp)) {
-                    items(articles, key = { it.id }) { article ->
+                    items(articles, key = { it.article.id }) { hot ->
                         ArticleCard(
-                            article = article,
-                            onClick = { onArticleClick(article.id) },
-                            onToggleStar = { viewModel.toggleStar(article.id) },
+                            article = hot.article,
+                            onClick = { onArticleClick(hot.article.id) },
+                            onToggleStar = { viewModel.toggleStar(hot.article.id) },
+                            clusterSize = hot.clusterSize,
                         )
                     }
                 }

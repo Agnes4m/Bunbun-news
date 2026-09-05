@@ -1,5 +1,6 @@
 package moe.bunbun.news.ui.common
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -20,9 +21,11 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import moe.bunbun.news.R
 import moe.bunbun.news.domain.model.Article
 import java.time.Duration
 import java.time.Instant
@@ -33,12 +36,14 @@ import java.time.ZoneId
  * 文章列表卡片（M6 通用组件）。
  * - 点击 → 打开阅读器（M7 接入）
  * - 星标按钮 → 切换收藏
+ * - clusterSize > 1 时显示"N 源报道"徽标（同事件多源聚合提示）
  */
 @Composable
 fun ArticleCard(
     article: Article,
     onClick: (Article) -> Unit = {},
     onToggleStar: (Article) -> Unit = {},
+    clusterSize: Int = 1,
     modifier: Modifier = Modifier,
 ) {
     Card(
@@ -73,6 +78,10 @@ fun ArticleCard(
                             overflow = TextOverflow.Ellipsis,
                         )
                     }
+                    if (clusterSize > 1) {
+                        Spacer(Modifier.height(6.dp))
+                        ClusterBadge(count = clusterSize)
+                    }
                 }
                 IconButton(
                     onClick = { onToggleStar(article) },
@@ -102,6 +111,22 @@ fun ArticleCard(
             }
         }
     }
+}
+
+/** "📰 N 个源都在报道" 徽标，主题色容器 */
+@Composable
+private fun ClusterBadge(count: Int) {
+    Text(
+        text = stringResource(R.string.cluster_badge, count),
+        style = MaterialTheme.typography.labelSmall,
+        color = MaterialTheme.colorScheme.onPrimaryContainer,
+        modifier = Modifier
+            .background(
+                color = MaterialTheme.colorScheme.primaryContainer,
+                shape = RoundedCornerShape(8.dp),
+            )
+            .padding(horizontal = 8.dp, vertical = 2.dp),
+    )
 }
 
 private fun formatRelativeTime(instant: Instant?): String {

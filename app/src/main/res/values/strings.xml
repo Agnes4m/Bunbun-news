@@ -52,4 +52,8 @@
     <string name="categories_group_yesterday">昨天</string>
     <string name="categories_group_this_week">本周</string>
     <string name="categories_group_earlier">更早</string>
+
+    <!-- 同事件多源卡片（v0.2 主题 B 子 4） -->
+    <!-- cluster_badge: 多源报道提示（%d 为同 cluster 的文章数） -->
+    <string name="cluster_badge">📰 %d 个源都在报道</string>
 </resources>
