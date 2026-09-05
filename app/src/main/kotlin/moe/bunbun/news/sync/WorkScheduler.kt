@@ -70,4 +70,25 @@ class WorkScheduler @Inject constructor(
     fun cancelPeriodicSync() {
         workManager.cancelUniqueWork(SyncWorker.UNIQUE_NAME)
     }
+
+    /**
+     * 链式触发 ImagePrefetchWorker：在 SyncWorker 成功后把最近 24h 文章的图片
+     * 预下载到 Coil 磁盘缓存。
+     *
+     * 使用 KEEP 策略——多次入队只保留最新版本，旧任务被新任务覆盖前会被取消。
+     */
+    fun enqueueImagePrefetch() {
+        val constraints = Constraints.Builder()
+            .setRequiredNetworkType(NetworkType.CONNECTED)
+            .build()
+        val request = OneTimeWorkRequestBuilder<ImagePrefetchWorker>()
+            .setConstraints(constraints)
+            .setBackoffCriteria(BackoffPolicy.EXPONENTIAL, 30, TimeUnit.SECONDS)
+            .build()
+        workManager.enqueueUniqueWork(
+            ImagePrefetchWorker.UNIQUE_NAME,
+            ExistingWorkPolicy.KEEP,
+            request,
+        )
+    }
 }

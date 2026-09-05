@@ -22,6 +22,7 @@ class SyncWorker @AssistedInject constructor(
     @Assisted params: WorkerParameters,
     private val feedRepository: FeedRepository,
     private val syncFeedsUseCase: SyncFeedsUseCase,
+    private val workScheduler: WorkScheduler,
 ) : CoroutineWorker(appContext, params) {
 
     override suspend fun doWork(): Result = coroutineScope {
@@ -34,6 +35,10 @@ class SyncWorker @AssistedInject constructor(
             val successCount = results.count { !it.skipped && it.error == null }
             val errorCount = results.count { it.error != null }
             Timber.tag("Sync").i("Sync done: $successCount ok, $errorCount errors, total ${results.size}")
+            // 同步成功后再触发图片预下载；失败时跳过避免浪费流量
+            if (successCount > 0) {
+                workScheduler.enqueueImagePrefetch()
+            }
             Result.success()
         } catch (t: Throwable) {
             Timber.tag("Sync").w(t, "SyncWorker failed")
