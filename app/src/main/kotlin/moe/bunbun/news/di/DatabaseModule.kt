@@ -12,6 +12,7 @@ import moe.bunbun.news.data.db.FeedDao
 import moe.bunbun.news.data.db.HistoryDao
 import moe.bunbun.news.data.db.SubscriptionDao
 import moe.bunbun.news.data.db.ZixunDatabase
+import moe.bunbun.news.data.summarycache.SummaryCacheDao
 import javax.inject.Singleton
 
 @Module
@@ -36,4 +37,7 @@ object DatabaseModule {
 
     @Provides
     fun provideHistoryDao(db: ZixunDatabase): HistoryDao = db.historyDao()
+
+    @Provides
+    fun provideSummaryCacheDao(db: ZixunDatabase): SummaryCacheDao = db.summaryCacheDao()
 }

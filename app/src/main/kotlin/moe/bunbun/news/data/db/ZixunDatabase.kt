@@ -2,6 +2,8 @@ package moe.bunbun.news.data.db
 
 import androidx.room.Database
 import androidx.room.RoomDatabase
+import moe.bunbun.news.data.summarycache.SummaryCacheDao
+import moe.bunbun.news.data.summarycache.SummaryCacheEntity
 
 @Database(
     entities = [
@@ -10,8 +12,9 @@ import androidx.room.RoomDatabase
         ArticleFtsEntity::class,
         SubscriptionEntity::class,
         HistoryEntity::class,
+        SummaryCacheEntity::class,
     ],
-    version = 2,
+    version = 3,
     exportSchema = true,
 )
 abstract class ZixunDatabase : RoomDatabase() {
@@ -19,6 +22,7 @@ abstract class ZixunDatabase : RoomDatabase() {
     abstract fun articleDao(): ArticleDao
     abstract fun subscriptionDao(): SubscriptionDao
     abstract fun historyDao(): HistoryDao
+    abstract fun summaryCacheDao(): SummaryCacheDao
 
     companion object {
         const val NAME = "zixun.db"
