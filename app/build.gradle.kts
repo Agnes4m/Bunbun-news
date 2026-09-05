@@ -104,6 +104,9 @@ dependencies {
     // RSS 解析（prof18/RSS-Parser）
     implementation(libs.rss.parser)
 
+    // 文章正文提取（Readability4J）
+    implementation(libs.readability4j)
+
     // WorkManager
     implementation(libs.work.runtime.ktx)
     implementation(libs.hilt.work)

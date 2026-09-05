@@ -42,6 +42,9 @@ coil = "2.7.0"
 # 日志
 timber = "5.0.1"
 
+# 文章正文提取（Readability4J：Mozilla Readability 的 Java 移植）
+readability4j = "1.0.8"
+
 # 测试
 junit = "4.13.2"
 mockk = "1.13.13"
@@ -100,6 +103,9 @@ coil-compose = { group = "io.coil-kt", name = "coil-compose", version.ref = "coi
 
 # 日志
 timber = { group = "com.jakewharton.timber", name = "timber", version.ref = "timber" }
+
+# 文章正文提取
+readability4j = { group = "net.dankito.readability4j", name = "readability4j", version.ref = "readability4j" }
 
 # 测试
 junit = { group = "junit", name = "junit", version.ref = "junit" }
