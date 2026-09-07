@@ -15,8 +15,10 @@ import kotlinx.coroutines.launch
 import moe.bunbun.news.data.fulltext.FulltextExtractor
 import moe.bunbun.news.data.prefs.UserPreferences
 import moe.bunbun.news.data.repo.ArticleRepository
+import moe.bunbun.news.data.repo.FeedRepository
 import moe.bunbun.news.data.repo.HistoryRepository
 import moe.bunbun.news.data.repo.SubscriptionRepository
+import moe.bunbun.news.data.repo.observeAllOnce
 import moe.bunbun.news.data.summarycache.ArticleSummarizer
 import moe.bunbun.news.domain.model.Article
 import moe.bunbun.news.domain.model.SubscriptionType
@@ -25,7 +27,7 @@ import javax.inject.Inject
 
 data class ReaderUiState(
     val article: Article? = null,
-    val clusterSize: Int = 0,        // 同 cluster 的文章数
+    val clusterSize: Int = 0,        // 同 cluster 的文章数（按时间排，>0 表示多源聚合）
     val isEventSubscribed: Boolean = false,
     /** AI 摘要状态：null=未请求；""=请求中无内容；非空=有摘要 */
     val summary: String? = null,
@@ -34,6 +36,10 @@ data class ReaderUiState(
     val fulltextLoading: Boolean = false,
     /** 拉全文失败时为 true，UI 显示「重试」按钮 */
     val fulltextFailed: Boolean = false,
+    /** v0.2 Plan A：同 cluster 的所有文章，按 publishedAt 升序；size==1 时不显示时间线 */
+    val clusterSiblings: List<Article> = emptyList(),
+    /** v0.2 Plan A：feedId → 源名，用于时间线 chip 上的源名展示 */
+    val feedTitlesById: Map<String, String> = emptyMap(),
 )
 
 /**
@@ -45,6 +51,7 @@ data class ReaderUiState(
 @HiltViewModel
 class ReaderViewModel @Inject constructor(
     private val articleRepository: ArticleRepository,
+    private val feedRepository: FeedRepository,
     private val historyRepository: HistoryRepository,
     private val subscriptionRepository: SubscriptionRepository,
     private val summarizer: ArticleSummarizer,
@@ -65,7 +72,12 @@ class ReaderViewModel @Inject constructor(
         if (articleIdFlow.value == articleId) return
         articleIdFlow.value = articleId
         // 重置全文加载状态（新文章）
-        _uiState.value = _uiState.value.copy(fulltextLoading = false, fulltextFailed = false)
+        _uiState.value = _uiState.value.copy(
+            fulltextLoading = false,
+            fulltextFailed = false,
+            clusterSiblings = emptyList(),
+            clusterSize = 0,
+        )
         // 打开即标记已读 + 写历史
         viewModelScope.launch {
             articleRepository.markRead(articleId, true)
@@ -80,6 +92,17 @@ class ReaderViewModel @Inject constructor(
                 )
                 _uiState.value = _uiState.value.copy(
                     isEventSubscribed = isSubscribed,
+                )
+                // v0.2 Plan A：拉同 cluster 的兄弟文章，按 publishedAt 升序排
+                val siblings = articleRepository.observeByCluster(article.clusterId).first()
+                    .sortedBy { it.publishedAt ?: it.fetchedAt }
+                // 一次性查所有 feedId → 源名
+                val feedTitles: Map<String, String> = feedRepository.observeAllOnce()
+                    .associate { feed -> feed.id to feed.title }
+                _uiState.value = _uiState.value.copy(
+                    clusterSiblings = siblings,
+                    clusterSize = siblings.size,
+                    feedTitlesById = feedTitles,
                 )
             }
             // v0.2-Reader-Content：检查是否需要按需拉全文

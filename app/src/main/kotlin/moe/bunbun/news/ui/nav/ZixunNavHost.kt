@@ -94,6 +94,8 @@ fun ZixunNavHost(modifier: Modifier = Modifier) {
             readingArticleId != null -> ReaderScreen(
                 articleId = readingArticleId!!,
                 onBack = { readingArticleId = null },
+                // v0.2 Plan A：点 timeline chip → 切换到同事件的另一篇（重置 articleId 触发 setArticleId）
+                onSwitchArticle = { newId -> readingArticleId = newId },
                 modifier = modifier.fillMaxSize().padding(innerPadding),
             )
             else -> when (subScreen) {

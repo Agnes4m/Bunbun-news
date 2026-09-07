@@ -5,6 +5,7 @@ import android.view.ViewGroup
 import android.webkit.WebSettings
 import android.webkit.WebView
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -14,14 +15,20 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.OpenInBrowser
 import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.outlined.StarOutline
+import androidx.compose.material3.AssistChip
+import androidx.compose.material3.AssistChipDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledTonalButton
@@ -42,11 +49,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.hilt.navigation.compose.hiltViewModel
 import moe.bunbun.news.R
 import moe.bunbun.news.domain.model.Article
+import java.time.Duration
+import java.time.Instant
+import java.time.LocalDateTime
+import java.time.ZoneId
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -55,6 +67,8 @@ fun ReaderScreen(
     onBack: () -> Unit,
     modifier: Modifier = Modifier,
     onOpenInBrowser: (String) -> Unit = {},
+    /** v0.2 Plan A：点 timeline 上的 chip 切换到同事件的其他文章。 */
+    onSwitchArticle: (String) -> Unit = {},
 ) {
     val viewModel: ReaderViewModel = hiltViewModel(key = "reader-$articleId")
     val article by viewModel.articleState.collectAsState()
@@ -68,7 +82,7 @@ fun ReaderScreen(
                 title = { Text(article?.title ?: "", maxLines = 1) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "返回")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.cd_back))
                     }
                 },
                 actions = {
@@ -76,7 +90,9 @@ fun ReaderScreen(
                     IconButton(onClick = { viewModel.toggleStar() }) {
                         Icon(
                             if (isStarred) Icons.Filled.Star else Icons.Outlined.StarOutline,
-                            contentDescription = "收藏",
+                            contentDescription = stringResource(
+                                if (isStarred) R.string.cd_unstar else R.string.cd_star
+                            ),
                             tint = if (isStarred) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.onSurface,
                         )
                     }
@@ -91,6 +107,13 @@ fun ReaderScreen(
                     EventSubscriptionBar(
                         isSubscribed = uiState.isEventSubscribed,
                         onToggle = viewModel::toggleEventSubscription,
+                    )
+                    // v0.2 Plan A：事件时间线（同 cluster 多于 1 篇才显示）
+                    EventTimelineStrip(
+                        siblings = uiState.clusterSiblings,
+                        currentArticleId = current.id,
+                        feedTitlesById = uiState.feedTitlesById,
+                        onSwitchArticle = onSwitchArticle,
                     )
                 }
                 SummaryCard(
@@ -116,7 +139,10 @@ fun ReaderScreen(
                     modifier = Modifier.fillMaxSize(),
                     contentAlignment = Alignment.Center,
                 ) {
-                    Text("加载中…", color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Text(
+                        stringResource(R.string.reader_loading_article),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
                 }
             }
         }
@@ -150,19 +176,19 @@ private fun FulltextStatusBar(
                 strokeWidth = 2.dp,
             )
             Text(
-                "正在加载完整正文…",
+                stringResource(R.string.fulltext_loading),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         } else if (failed) {
             Text(
-                "完整正文加载失败，可手动重试",
+                stringResource(R.string.fulltext_failed),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.error,
                 modifier = Modifier.weight(1f),
             )
             TextButton(onClick = onRetry) {
-                Text("重试", style = MaterialTheme.typography.labelMedium)
+                Text(stringResource(R.string.fulltext_retry), style = MaterialTheme.typography.labelMedium)
             }
         }
     }
@@ -265,9 +291,107 @@ private fun EventSubscriptionBar(isSubscribed: Boolean, onToggle: () -> Unit) {
             contentDescription = null,
         )
         Text(
-            if (isSubscribed) "  已订阅此事件（点此取消）" else "  订阅此事件后续报道",
+            // v0.2 i18n 收尾：用 stringResource 替掉之前的硬编码中文
+            text = "  " + stringResource(
+                if (isSubscribed) R.string.subscribed_event else R.string.unsubscribed_event
+            ),
             fontWeight = if (isSubscribed) FontWeight.SemiBold else FontWeight.Normal,
         )
+    }
+}
+
+/**
+ * v0.2 Plan A 事件时间线（同 cluster 的所有文章，按时间排）。
+ *
+ * 渲染规则：
+ * - siblings.size <= 1：不渲染（单源或唯一报道）
+ * - 当前文章的 chip 用 primaryContainer 高亮
+ * - 首报 chip 标 "● 首报"；其他标 "后续" / "回应"（按 publishedAt 是否晚于集群中位数）
+ *
+ * 点 chip → onSwitchArticle(articleId) → ReaderViewModel.setArticleId 切过去
+ */
+@Composable
+private fun EventTimelineStrip(
+    siblings: List<Article>,
+    currentArticleId: String,
+    feedTitlesById: Map<String, String>,
+    onSwitchArticle: (String) -> Unit,
+) {
+    if (siblings.size <= 1) return
+
+    val firstReport = siblings.minByOrNull { it.publishedAt ?: it.fetchedAt } ?: siblings.first()
+    val medianTime = siblings
+        .mapNotNull { it.publishedAt }
+        .sorted()
+        .let { ts -> if (ts.isEmpty()) null else ts[ts.size / 2] }
+
+    Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 4.dp)) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Icon(
+                Icons.Filled.Schedule,
+                contentDescription = null,
+                modifier = Modifier.size(16.dp),
+                tint = MaterialTheme.colorScheme.primary,
+            )
+            Spacer(Modifier.size(4.dp))
+            Text(
+                text = stringResource(R.string.event_timeline_title) + " · " +
+                    stringResource(R.string.event_timeline_summary, siblings.size),
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                fontWeight = FontWeight.Medium,
+            )
+        }
+        Spacer(Modifier.size(6.dp))
+        LazyRow(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+            items(siblings, key = { it.id }) { sibling ->
+                val isCurrent = sibling.id == currentArticleId
+                val isFirst = sibling.id == firstReport.id
+                val roleLabel = when {
+                    isFirst -> stringResource(R.string.event_first_report)
+                    medianTime != null && (sibling.publishedAt ?: sibling.fetchedAt).isAfter(medianTime) ->
+                        stringResource(R.string.event_response)
+                    else -> stringResource(R.string.event_followup)
+                }
+                val feedName = feedTitlesById[sibling.feedId] ?: ""
+                AssistChip(
+                    onClick = { if (!isCurrent) onSwitchArticle(sibling.id) },
+                    label = {
+                        Text(
+                            text = "$roleLabel · $feedName · ${relativeShort(sibling.publishedAt ?: sibling.fetchedAt)}",
+                            style = MaterialTheme.typography.labelSmall,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                        )
+                    },
+                    colors = if (isCurrent) {
+                        AssistChipDefaults.assistChipColors(
+                            containerColor = MaterialTheme.colorScheme.primaryContainer,
+                            labelColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                        )
+                    } else {
+                        AssistChipDefaults.assistChipColors()
+                    },
+                )
+            }
+        }
+    }
+}
+
+/** 短相对时间（用于 timeline chip）：如 "2h"、"30m"、"3d" */
+private fun relativeShort(instant: Instant): String {
+    val now = Instant.now()
+    val d = Duration.between(instant, now)
+    return when {
+        d.isNegative -> "now"
+        d.toMinutes() < 1 -> "now"
+        d.toMinutes() < 60 -> "${d.toMinutes()}m"
+        d.toHours() < 24 -> "${d.toHours()}h"
+        d.toDays() < 7 -> "${d.toDays()}d"
+        else -> {
+            val dt = LocalDateTime.ofInstant(instant, ZoneId.systemDefault())
+            "${dt.monthValue}/${dt.dayOfMonth}"
+        }
     }
 }
 
