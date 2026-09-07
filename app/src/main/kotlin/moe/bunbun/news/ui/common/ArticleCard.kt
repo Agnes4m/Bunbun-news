@@ -74,7 +74,9 @@ fun ArticleCard(
                             article.excerpt,
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            maxLines = 2,
+                            // v0.2-Reader：列表卡片多露出几行正文，让用户在列表里就能读到更多内容
+                            // 不再强制跳浏览器；点卡片再开全屏阅读器 WebView
+                            maxLines = 4,
                             overflow = TextOverflow.Ellipsis,
                         )
                     }
