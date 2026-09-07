@@ -1,5 +1,6 @@
 package moe.bunbun.news
 
+import android.content.Context
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -14,6 +15,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
+import moe.bunbun.news.i18n.LocaleCache
+import moe.bunbun.news.i18n.LocaleHelper
 import moe.bunbun.news.ui.nav.MainViewModel
 import moe.bunbun.news.ui.nav.ZixunNavHost
 import moe.bunbun.news.ui.theme.BunbunNewsTheme
@@ -21,7 +25,15 @@ import moe.bunbun.news.ui.theme.BunbunNewsTheme
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 
+    @Inject lateinit var localeCache: LocaleCache
+
     private val viewModel: MainViewModel by viewModels()
+
+    override fun attachBaseContext(newBase: Context) {
+        // attachBaseContext 是同步钩子，无法 await DataStore
+        // LocaleCache 用 SharedPreferences 提供同步读路径
+        super.attachBaseContext(LocaleHelper.wrap(newBase, localeCache.locale))
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

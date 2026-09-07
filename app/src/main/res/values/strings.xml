@@ -1,69 +1,137 @@
 <resources>
-    <string name="app_name">文闻 Bunbun News</string>
+    <!--
+      v0.2 i18n: values/strings.xml is the English (default) locale.
+      values-zh/strings.xml contains the Simplified Chinese translations.
+      Toggle via Settings → Language.
+    -->
+    <string name="app_name">Bunbun News</string>
 
-    <!-- 底部导航 5 Tab -->
-    <string name="tab_home">首页</string>
-    <string name="tab_search">搜索</string>
-    <string name="tab_categories">分类</string>
-    <string name="tab_subscriptions">订阅</string>
-    <string name="tab_profile">个人</string>
+    <!-- Bottom navigation 5 tabs -->
+    <string name="tab_home">Home</string>
+    <string name="tab_search">Search</string>
+    <string name="tab_categories">Categories</string>
+    <string name="tab_subscriptions">Subscriptions</string>
+    <string name="tab_profile">Profile</string>
 
-    <!-- 个人页内子标题 -->
-    <string name="profile_history">历史记录</string>
-    <string name="profile_starred">收藏</string>
-    <string name="profile_manage_feeds">订阅管理</string>
-    <string name="profile_settings">设置</string>
-    <string name="profile_about">关于</string>
+    <!-- Profile sub-titles -->
+    <string name="profile_history">History</string>
+    <string name="profile_starred">Starred</string>
+    <string name="profile_manage_feeds">Manage Feeds</string>
+    <string name="profile_settings">Settings</string>
+    <string name="profile_about">About</string>
 
-    <!-- 通用 -->
-    <string name="empty_placeholder">空空如也</string>
-    <string name="add_feed">添加订阅</string>
-    <string name="import_opml">导入 OPML</string>
-    <string name="subscribe_event">订阅此事件</string>
+    <!-- Common -->
+    <string name="empty_placeholder">Nothing here yet</string>
+    <string name="add_feed">Add Feed</string>
+    <string name="import_opml">Import OPML</string>
+    <string name="subscribe_event">Subscribe to event</string>
 
-    <!-- 关于页（AboutScreen）—— 直接改这里就能改关于页展示内容 -->
-    <!-- about_tagline: 一句话介绍 app -->
-    <string name="about_tagline">一个轻量级 RSS 新闻聚合器</string>
-    <!-- about_license: 协议声明 -->
+    <!-- About screen -->
+    <string name="about_tagline">A lightweight RSS news aggregator</string>
     <string name="about_license">Apache License 2.0</string>
-    <!-- about_credits: 鸣谢的开源项目/作者，用顿号或逗号分隔 -->
-    <string name="about_credits">鸣谢：Read You、FeedFlow、Miniflux、ROME、kxml2</string>
+    <string name="about_credits">Credits: Read You, FeedFlow, Miniflux, ROME, kxml2</string>
 
-    <!-- 引导页（OnboardingScreen）—— 可本地化直接改这里 -->
-    <!-- onboarding_app_name: 标题 -->
-    <string name="onboarding_app_name">文闻 Bunbun News</string>
-    <!-- onboarding_tagline: 副标题 -->
-    <string name="onboarding_tagline">一个轻量级 RSS 新闻聚合器</string>
-    <!-- onboarding_title: 推荐源卡片标题（%d 为推荐源数量） -->
-    <string name="onboarding_title">v0.1 精选 %d 个推荐订阅源</string>
-    <!-- onboarding_subtitle: 推荐源卡片副标题 -->
-    <string name="onboarding_subtitle">覆盖科技 / 国际 / 财经 / 社区</string>
-    <!-- onboarding_import_button: 主按钮（%d 为推荐源数量） -->
-    <string name="onboarding_import_button">一键导入 %d 个推荐源</string>
-    <!-- onboarding_skip: 跳过按钮 -->
-    <string name="onboarding_skip">跳过，稍后自己添加</string>
-    <!-- onboarding_importing: 导入中（初始） -->
-    <string name="onboarding_importing">正在添加推荐源...</string>
-    <!-- onboarding_importing_progress: 导入中（已有计数，%d 为已添加数） -->
-    <string name="onboarding_importing_progress">已添加 %d 个，准备同步...</string>
+    <!-- Onboarding / empty-feed prompt -->
+    <string name="onboarding_app_name">Bunbun News</string>
+    <string name="onboarding_tagline">A lightweight RSS news aggregator</string>
+    <string name="onboarding_title">v0.2 curated %d sample feeds</string>
+    <string name="onboarding_subtitle">Tech / World / Finance / Community</string>
+    <string name="onboarding_import_button">Import %d sample feeds</string>
+    <string name="onboarding_add_manually">Add RSS feed manually</string>
+    <string name="onboarding_importing">Adding sample feeds…</string>
+    <string name="onboarding_importing_progress">Added %d, preparing sync…</string>
+    <string name="empty_home_title">No articles yet</string>
+    <string name="empty_home_subtitle">Add an RSS subscription to start your feed</string>
 
-    <!-- 分类 Tab 日期分组（v0.2 新增） -->
-    <string name="categories_group_today">今天</string>
-    <string name="categories_group_yesterday">昨天</string>
-    <string name="categories_group_this_week">本周</string>
-    <string name="categories_group_earlier">更早</string>
+    <!-- Categories date groupings -->
+    <string name="categories_group_today">Today</string>
+    <string name="categories_group_yesterday">Yesterday</string>
+    <string name="categories_group_this_week">This week</string>
+    <string name="categories_group_earlier">Earlier</string>
 
-    <!-- 同事件多源卡片（v0.2 主题 B 子 4） -->
-    <!-- cluster_badge: 多源报道提示（%d 为同 cluster 的文章数） -->
-    <string name="cluster_badge">📰 %d 个源都在报道</string>
+    <!-- Cluster badge: "N sources reporting" -->
+    <string name="cluster_badge">📰 %d sources reporting</string>
 
-    <!-- AI 摘要（v0.2 主题 D 子 7 — ReaderScreen 接入） -->
-    <!-- summary_section: 摘要分区标题 -->
-    <string name="summary_section">AI 摘要</string>
-    <!-- summary_loading: 摘要生成中 -->
-    <string name="summary_loading">生成中…</string>
-    <!-- summary_empty: 摘要不可用（provider 失败 / 未配置） -->
-    <string name="summary_empty">暂无摘要（未配置 AI provider 或网络失败）</string>
-    <!-- summary_resummarize: 重新生成按钮 -->
-    <string name="summary_resummarize">重新生成</string>
+    <!-- AI summary -->
+    <string name="summary_section">AI Summary</string>
+    <string name="summary_loading">Generating…</string>
+    <string name="summary_empty">No summary (AI provider not configured or network failed)</string>
+    <string name="summary_resummarize">Regenerate</string>
+
+    <!-- Settings screen -->
+    <string name="settings_section_appearance">Appearance</string>
+    <string name="settings_section_sync">Sync</string>
+    <string name="settings_section_cache">Cache</string>
+    <string name="settings_section_backend">Cloud backend</string>
+    <string name="settings_section_ai">AI summary</string>
+    <string name="settings_section_language">Language</string>
+    <string name="settings_dynamic_color">Material You dynamic color</string>
+    <string name="settings_dynamic_color_sub">Pull from wallpaper on Android 12+; ignored in Eye Care</string>
+    <string name="settings_clear_history">Clear reading history</string>
+    <string name="settings_clear_history_sub">v0.2 implemented</string>
+    <string name="settings_reset_db">Reset database</string>
+    <string name="settings_reset_db_sub">v0.2 implemented</string>
+    <string name="settings_save_credentials">Save credentials</string>
+    <string name="settings_save">Save</string>
+    <string name="settings_url_label">URL (e.g. https://miniflux.example/)</string>
+    <string name="settings_username_label">Username</string>
+    <string name="settings_key_label_miniflux">API Token / Key</string>
+    <string name="settings_key_label_fever">Password (md5 hashed on save)</string>
+    <string name="settings_deepseek_key_label">DeepSeek API Key</string>
+
+    <!-- Theme options -->
+    <string name="theme_follow_system">Follow system</string>
+    <string name="theme_follow_system_sub">Match the OS dark mode setting</string>
+    <string name="theme_light">Light</string>
+    <string name="theme_light_sub">Always use light theme</string>
+    <string name="theme_dark">Dark</string>
+    <string name="theme_dark_sub">Always use dark theme (saves battery)</string>
+    <string name="theme_eye_care">Eye Care</string>
+    <string name="theme_eye_care_sub">Beige bg / dark-brown text, easy on the eyes at night</string>
+
+    <!-- Sync interval -->
+    <string name="sync_fast">Frequent</string>
+    <string name="sync_normal">Normal (recommended)</string>
+    <string name="sync_relaxed">Battery saver</string>
+    <string name="sync_manual">Manual only</string>
+    <string name="sync_interval_minutes">%d minutes</string>
+
+    <!-- Backend options -->
+    <string name="backend_local">Local offline (default)</string>
+    <string name="backend_local_sub">Pure local RSS fetching, no cloud sync</string>
+    <string name="backend_miniflux">Miniflux</string>
+    <string name="backend_miniflux_sub">Self-hosted Miniflux (X-Auth-Token)</string>
+    <string name="backend_fever">Fever</string>
+    <string name="backend_fever_sub">Any service compatible with the Fever protocol</string>
+
+    <!-- AI provider options -->
+    <string name="summary_provider_off">Off</string>
+    <string name="summary_provider_off_sub">Don\'t show AI summary in the reader</string>
+    <string name="summary_provider_deepseek">DeepSeek (cloud)</string>
+    <string name="summary_provider_deepseek_sub">DeepSeek Chat Completions; requires API key</string>
+    <string name="summary_provider_local">Local Gemma 2B (placeholder)</string>
+    <string name="summary_provider_local_sub">Available after MediaPipe integration in v0.2.x</string>
+
+    <!-- Language picker -->
+    <string name="lang_system">Follow system</string>
+    <string name="lang_en">English</string>
+    <string name="lang_zh">简体中文</string>
+    <string name="lang_system_desc">Match Android system language</string>
+    <string name="lang_en_desc">Use English everywhere</string>
+    <string name="lang_zh_desc">Use Simplified Chinese</string>
+
+    <!-- Empty states -->
+    <string name="empty_starred_title">No starred articles</string>
+    <string name="empty_history_title">No reading history</string>
+    <string name="empty_subscriptions_title">No subscriptions yet</string>
+    <string name="empty_subscriptions_sub">Tap + to add an RSS feed</string>
+    <string name="empty_search_placeholder">Search article title or summary…</string>
+    <string name="reader_loading">Loading…</string>
+    <string name="add_feed_url_label">RSS / Atom URL</string>
+    <string name="add_feed_title_label">Title (optional)</string>
+    <string name="add_feed_button">Add</string>
+    <string name="cancel">Cancel</string>
+    <string name="open_in_browser">Open in browser</string>
+    <string name="unsubscribed_event">Subscribe to this event</string>
+    <string name="subscribed_event">Subscribed to this event (tap to unsubscribe)</string>
 </resources>

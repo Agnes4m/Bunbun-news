@@ -43,6 +43,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import moe.bunbun.news.R
+import moe.bunbun.news.data.prefs.AppLocale
 import moe.bunbun.news.data.prefs.BackendType
 import moe.bunbun.news.data.prefs.SummaryProviderType
 import moe.bunbun.news.data.prefs.SyncInterval
@@ -70,6 +71,8 @@ class SettingsViewModel @Inject constructor(
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
     val summaryProvider: StateFlow<SummaryProviderType> = prefs.summaryProvider
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), SummaryProviderType.OFF)
+    val appLocale: StateFlow<AppLocale> = prefs.appLocale
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), AppLocale.SYSTEM)
 
     fun setThemeMode(mode: ThemeMode?) {
         viewModelScope.launch { prefs.setThemeMode(mode) }
@@ -121,6 +124,14 @@ class SettingsViewModel @Inject constructor(
     fun setSummaryProvider(type: SummaryProviderType, deepseekApiKey: String? = null) {
         viewModelScope.launch { prefs.setSummaryProvider(type, deepseekApiKey) }
     }
+
+    /**
+     * 语言切换：写入 DataStore + 同步到 LocaleCache，下一次重启 attachBaseContext 立即生效。
+     * 不在 VM 内 Activity.recreate() —— 留给系统下次拉起或用户手动触发。
+     */
+    fun setAppLocale(locale: AppLocale) {
+        viewModelScope.launch { prefs.setAppLocale(locale) }
+    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -137,6 +148,7 @@ fun SettingsScreen(
     val backendUrl by viewModel.backendUrl.collectAsState()
     val backendUsername by viewModel.backendUsername.collectAsState()
     val summaryProvider by viewModel.summaryProvider.collectAsState()
+    val appLocale by viewModel.appLocale.collectAsState()
 
     Scaffold(
         modifier = modifier,
@@ -197,6 +209,31 @@ fun SettingsScreen(
                     checked = dynamicColor,
                     onCheckedChange = viewModel::setDynamicColor,
                 )
+            }
+            HorizontalDivider()
+
+            // v0.2-i18n：语言选择（中英双语）
+            SectionHeader(stringResource(R.string.settings_section_language))
+            AppLocaleOptionUi.entries.forEach { option ->
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 4.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    RadioButton(
+                        selected = option.locale == appLocale,
+                        onClick = { viewModel.setAppLocale(option.locale) },
+                    )
+                    Column(modifier = Modifier.padding(start = 8.dp)) {
+                        Text(option.label(), fontWeight = FontWeight.Medium)
+                        Text(
+                            option.description(),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
+                }
             }
             HorizontalDivider()
 
@@ -452,4 +489,22 @@ private enum class SummaryProviderOptionUi(
     OFF(SummaryProviderType.OFF, "关闭", "不在阅读器中显示 AI 摘要"),
     DEEPSEEK(SummaryProviderType.DEEPSEEK, "DeepSeek（云端）", "使用 DeepSeek Chat Completions；需 API Key"),
     LOCAL(SummaryProviderType.LOCAL, "本地 Gemma 2B（占位）", "v0.2.x 接 MediaPipe 后可用"),
+}
+
+/** 语言选项（v0.2-i18n：中英双语 + 跟随系统） */
+private enum class AppLocaleOptionUi(
+    val locale: AppLocale,
+    @androidx.annotation.StringRes val labelRes: Int,
+    @androidx.annotation.StringRes val descRes: Int,
+) {
+    SYSTEM(AppLocale.SYSTEM, R.string.lang_system, R.string.lang_system_desc),
+    ENGLISH(AppLocale.ENGLISH, R.string.lang_en, R.string.lang_en_desc),
+    CHINESE(AppLocale.CHINESE, R.string.lang_zh, R.string.lang_zh_desc),
+    ;
+
+    @Composable
+    fun label(): String = stringResource(labelRes)
+
+    @Composable
+    fun description(): String = stringResource(descRes)
 }

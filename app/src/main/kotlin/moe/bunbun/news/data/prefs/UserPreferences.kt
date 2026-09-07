@@ -8,6 +8,7 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
+import moe.bunbun.news.i18n.LocaleCache
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
@@ -15,6 +16,24 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "bunbun_prefs")
+
+/**
+ * 用户界面语言偏好（v0.2 i18n）。
+ *
+ * - SYSTEM：跟随系统 locale（默认）
+ * - ENGLISH：强制 values/strings.xml
+ * - CHINESE：强制 values-zh/strings.xml
+ */
+enum class AppLocale(val key: String) {
+    SYSTEM("system"),
+    ENGLISH("en"),
+    CHINESE("zh"),
+    ;
+
+    companion object {
+        fun fromKey(key: String?): AppLocale = entries.firstOrNull { it.key == key } ?: SYSTEM
+    }
+}
 
 enum class SyncInterval(val minutes: Long) {
     FAST(15),
@@ -73,6 +92,7 @@ enum class SummaryProviderType(val key: String) {
 @Singleton
 class UserPreferences @Inject constructor(
     @ApplicationContext private val context: Context,
+    private val localeCache: LocaleCache,
 ) {
     private val THEME_MODE = stringPreferencesKey("theme_mode")
     private val SYNC_INTERVAL = intPreferencesKey("sync_interval_minutes")
@@ -92,6 +112,9 @@ class UserPreferences @Inject constructor(
     // v0.2 主题 D 子 4：AI 摘要 provider 配置
     private val SUMMARY_PROVIDER = stringPreferencesKey("summary_provider")
     private val DEEPSEEK_API_KEY = stringPreferencesKey("deepseek_api_key")
+
+    // v0.2 i18n：界面语言
+    private val APP_LOCALE = stringPreferencesKey("app_locale")
 
     /** 主题偏好：null = 跟随系统 */
     val themeMode: Flow<ThemeMode?> = context.dataStore.data.map { prefs ->
@@ -131,6 +154,11 @@ class UserPreferences @Inject constructor(
 
     /** DeepSeek API key */
     val deepseekApiKey: Flow<String?> = context.dataStore.data.map { it[DEEPSEEK_API_KEY] }
+
+    /** 用户界面语言（默认 SYSTEM = 跟随系统） */
+    val appLocale: Flow<AppLocale> = context.dataStore.data.map {
+        AppLocale.fromKey(it[APP_LOCALE])
+    }
 
     /** 设置主题偏好（null = 跟随系统） */
     suspend fun setThemeMode(mode: ThemeMode?) {
@@ -180,5 +208,11 @@ class UserPreferences @Inject constructor(
             prefs[SUMMARY_PROVIDER] = type.key
             if (deepseekApiKey != null) prefs[DEEPSEEK_API_KEY] = deepseekApiKey
         }
+    }
+
+    suspend fun setAppLocale(locale: AppLocale) {
+        context.dataStore.edit { it[APP_LOCALE] = locale.key }
+        // 同步镜像到 LocaleCache，下一次 attachBaseContext 立即能读到
+        localeCache.locale = locale
     }
 }

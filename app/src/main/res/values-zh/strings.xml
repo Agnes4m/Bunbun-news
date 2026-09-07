@@ -1,0 +1,132 @@
+<resources>
+    <string name="app_name">文闻 Bunbun News</string>
+
+    <!-- 底部导航 5 Tab -->
+    <string name="tab_home">首页</string>
+    <string name="tab_search">搜索</string>
+    <string name="tab_categories">分类</string>
+    <string name="tab_subscriptions">订阅</string>
+    <string name="tab_profile">个人</string>
+
+    <!-- 个人页内子标题 -->
+    <string name="profile_history">历史记录</string>
+    <string name="profile_starred">收藏</string>
+    <string name="profile_manage_feeds">订阅管理</string>
+    <string name="profile_settings">设置</string>
+    <string name="profile_about">关于</string>
+
+    <!-- 通用 -->
+    <string name="empty_placeholder">空空如也</string>
+    <string name="add_feed">添加订阅</string>
+    <string name="import_opml">导入 OPML</string>
+    <string name="subscribe_event">订阅此事件</string>
+
+    <!-- 关于页（AboutScreen） -->
+    <string name="about_tagline">一个轻量级 RSS 新闻聚合器</string>
+    <string name="about_license">Apache License 2.0</string>
+    <string name="about_credits">鸣谢：Read You、FeedFlow、Miniflux、ROME、kxml2</string>
+
+    <!-- 引导页 / 空状态 -->
+    <string name="onboarding_app_name">文闻 Bunbun News</string>
+    <string name="onboarding_tagline">一个轻量级 RSS 新闻聚合器</string>
+    <string name="onboarding_title">v0.2 精选 %d 个推荐订阅源</string>
+    <string name="onboarding_subtitle">覆盖科技 / 国际 / 财经 / 社区</string>
+    <string name="onboarding_import_button">一键导入 %d 个推荐源</string>
+    <string name="onboarding_add_manually">手动添加 RSS 订阅</string>
+    <string name="onboarding_importing">正在添加推荐源...</string>
+    <string name="onboarding_importing_progress">已添加 %d 个，准备同步...</string>
+    <string name="empty_home_title">还没有文章</string>
+    <string name="empty_home_subtitle">先添加 RSS 订阅源，开始你的新闻流</string>
+
+    <!-- 分类 Tab 日期分组 -->
+    <string name="categories_group_today">今天</string>
+    <string name="categories_group_yesterday">昨天</string>
+    <string name="categories_group_this_week">本周</string>
+    <string name="categories_group_earlier">更早</string>
+
+    <!-- 同事件多源卡片 -->
+    <string name="cluster_badge">📰 %d 个源都在报道</string>
+
+    <!-- AI 摘要 -->
+    <string name="summary_section">AI 摘要</string>
+    <string name="summary_loading">生成中…</string>
+    <string name="summary_empty">暂无摘要（未配置 AI provider 或网络失败）</string>
+    <string name="summary_resummarize">重新生成</string>
+
+    <!-- 设置页 -->
+    <string name="settings_section_appearance">外观</string>
+    <string name="settings_section_sync">同步</string>
+    <string name="settings_section_cache">缓存</string>
+    <string name="settings_section_backend">云端后端</string>
+    <string name="settings_section_ai">AI 摘要</string>
+    <string name="settings_section_language">语言</string>
+    <string name="settings_dynamic_color">Material You 动态配色</string>
+    <string name="settings_dynamic_color_sub">Android 12+ 取壁纸主色；护眼主题下忽略</string>
+    <string name="settings_clear_history">清空阅读历史</string>
+    <string name="settings_clear_history_sub">v0.2 实装</string>
+    <string name="settings_reset_db">重置数据库</string>
+    <string name="settings_reset_db_sub">v0.2 实装</string>
+    <string name="settings_save_credentials">保存凭据</string>
+    <string name="settings_save">保存</string>
+    <string name="settings_url_label">URL（如 https://miniflux.example/）</string>
+    <string name="settings_username_label">用户名</string>
+    <string name="settings_key_label_miniflux">API Token / Key</string>
+    <string name="settings_key_label_fever">密码（保存时算 md5）</string>
+    <string name="settings_deepseek_key_label">DeepSeek API Key</string>
+
+    <!-- 主题选项 -->
+    <string name="theme_follow_system">跟随系统</string>
+    <string name="theme_follow_system_sub">跟随 Android 系统深色设置</string>
+    <string name="theme_light">浅色</string>
+    <string name="theme_light_sub">始终使用浅色主题</string>
+    <string name="theme_dark">深色</string>
+    <string name="theme_dark_sub">始终使用深色主题（省电）</string>
+    <string name="theme_eye_care">护眼</string>
+    <string name="theme_eye_care_sub">米黄底深棕字，夜间阅读舒适</string>
+
+    <!-- 同步频率 -->
+    <string name="sync_fast">频繁</string>
+    <string name="sync_normal">普通（推荐）</string>
+    <string name="sync_relaxed">省流</string>
+    <string name="sync_manual">仅手动</string>
+    <string name="sync_interval_minutes">%d 分钟一次</string>
+
+    <!-- 后端选项 -->
+    <string name="backend_local">本地离线（默认）</string>
+    <string name="backend_local_sub">纯本地 RSS 抓取，无云端同步</string>
+    <string name="backend_miniflux">Miniflux</string>
+    <string name="backend_miniflux_sub">自托管 Miniflux 服务（X-Auth-Token）</string>
+    <string name="backend_fever">Fever</string>
+    <string name="backend_fever_sub">任意兼容 Fever 协议的 RSS 服务</string>
+
+    <!-- AI 摘要 provider 选项 -->
+    <string name="summary_provider_off">关闭</string>
+    <string name="summary_provider_off_sub">不在阅读器中显示 AI 摘要</string>
+    <string name="summary_provider_deepseek">DeepSeek（云端）</string>
+    <string name="summary_provider_deepseek_sub">使用 DeepSeek Chat Completions；需 API Key</string>
+    <string name="summary_provider_local">本地 Gemma 2B（占位）</string>
+    <string name="summary_provider_local_sub">v0.2.x 接 MediaPipe 后可用</string>
+
+    <!-- 语言选择 -->
+    <string name="lang_system">跟随系统</string>
+    <string name="lang_en">English</string>
+    <string name="lang_zh">简体中文</string>
+    <string name="lang_system_desc">匹配 Android 系统语言</string>
+    <string name="lang_en_desc">界面全部使用英文</string>
+    <string name="lang_zh_desc">使用简体中文</string>
+
+    <!-- 空状态 -->
+    <string name="empty_starred_title">暂无收藏</string>
+    <string name="empty_history_title">暂无历史</string>
+    <string name="empty_subscriptions_title">还没订内容</string>
+    <string name="empty_subscriptions_sub">点击 + 添加 RSS 源</string>
+    <string name="empty_search_placeholder">搜索文章标题或摘要…</string>
+    <string name="reader_loading">加载中…</string>
+    <string name="add_feed_url_label">RSS / Atom URL</string>
+    <string name="add_feed_title_label">标题（可选）</string>
+    <string name="add_feed_button">添加</string>
+    <string name="cancel">取消</string>
+    <string name="open_in_browser">在浏览器中打开</string>
+    <string name="unsubscribed_event">订阅此事件后续报道</string>
+    <string name="subscribed_event">已订阅此事件（点此取消）</string>
+</resources>
