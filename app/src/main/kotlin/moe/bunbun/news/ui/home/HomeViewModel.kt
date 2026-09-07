@@ -36,15 +36,27 @@ class HomeViewModel @Inject constructor(
      * 多源报道的事件优先，然后按发布时间倒序。无 clusterId 的文章排最后。
      *
      * 每条 hot article 携带 clusterSize，让 UI 决定是否显示"📰 N 源都在报道"徽标。
+     *
+     * v0.2 Plan A 修复：clusterSize 现在统计 distinct feedId 数（之前错算成文章行数）。
+     * 例：少数派、IT之家各 3 篇同事件报道 → 徽标显示"2 源"而不是"6 篇"。
      */
     val hotArticles: StateFlow<List<HotArticle>> = articleRepository.observeRecent(limit = 200)
         .map { articles ->
-            val clusterCounts: Map<String, Int> =
-                articles.mapNotNull { it.clusterId }.groupingBy { it }.eachCount()
+            // 对每个 clusterId，统计 distinct feedId 数
+            val clusterSourceCounts: Map<String, Int> = articles
+                .mapNotNull { it.clusterId }
+                .distinct()
+                .associateWith { cid ->
+                    articles.asSequence()
+                        .filter { it.clusterId == cid }
+                        .map { it.feedId }
+                        .distinct()
+                        .count()
+                }
             val sorted = articles.sortedWith(
                 compareByDescending<Article> { a ->
-                    // 无 clusterId 的视为 -1，永远排最后；否则按 cluster 大小
-                    if (a.clusterId != null) clusterCounts[a.clusterId] ?: 0 else -1
+                    // 无 clusterId 的视为 -1，永远排最后；否则按 distinct 源数
+                    if (a.clusterId != null) clusterSourceCounts[a.clusterId] ?: 0 else -1
                 }.thenByDescending { it.publishedAt ?: Instant.EPOCH },
             )
             // 同 cluster 重复项只展示第一条（避免多源聚合卡被刷屏）
@@ -53,7 +65,7 @@ class HomeViewModel @Inject constructor(
             for (article in sorted) {
                 val key = article.clusterId
                 if (seenClusters.add(key)) {
-                    val size = if (key != null) clusterCounts[key] ?: 1 else 1
+                    val size = if (key != null) clusterSourceCounts[key] ?: 1 else 1
                     result += HotArticle(article, size)
                 }
             }
