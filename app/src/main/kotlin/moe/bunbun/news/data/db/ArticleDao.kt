@@ -108,6 +108,17 @@ interface ArticleDao {
     @Query("UPDATE articles SET clusterId = :clusterId WHERE id = :id")
     suspend fun setClusterId(id: String, clusterId: String)
 
+    /**
+     * 批量重写 clusterId（v0.2 聚合去重 Plan A）。
+     * 单事务内多次 UPDATE，比循环 setClusterId 快 N 倍。
+     */
+    @androidx.room.Transaction
+    suspend fun setClusterIdsBulk(updates: Map<String, String>) {
+        for ((id, cid) in updates) {
+            setClusterId(id, cid)
+        }
+    }
+
     /** v0.2-Reader-Content：写回抽取后的全文 HTML */
     @Query("UPDATE articles SET contentHtml = :contentHtml WHERE id = :id")
     suspend fun updateContentHtml(id: String, contentHtml: String?)
