@@ -35,7 +35,7 @@ fun SubscriptionsScreen(
     modifier: Modifier = Modifier,
     viewModel: SubscriptionsViewModel = hiltViewModel(),
 ) {
-    val articles by viewModel.timeline.collectAsState()
+    val items by viewModel.timelineWithCluster.collectAsState()
 
     Scaffold(
         topBar = {
@@ -43,29 +43,33 @@ fun SubscriptionsScreen(
                 title = { Text(stringResource(R.string.tab_subscriptions)) },
                 actions = {
                     IconButton(onClick = onNavigateToManageFeeds) {
-                        Icon(Icons.Filled.Settings, contentDescription = "管理订阅")
+                        Icon(
+                            Icons.Filled.Settings,
+                            contentDescription = stringResource(R.string.cd_manage_subscriptions),
+                        )
                     }
                 },
             )
         },
     ) { padding ->
         Box(modifier = Modifier.fillMaxSize().padding(padding)) {
-            if (articles.isEmpty()) {
+            if (items.isEmpty()) {
                 EmptyHint(onManageFeeds = onNavigateToManageFeeds)
             } else {
                 Column {
                     Text(
-                        "${articles.size} 篇已订内容（源 + 事件）",
+                        text = stringResource(R.string.subscriptions_count_label, items.size),
                         style = MaterialTheme.typography.labelMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp),
                     )
                     LazyColumn(verticalArrangement = Arrangement.spacedBy(0.dp)) {
-                        items(articles, key = { it.id }) { article ->
+                        items(items, key = { it.article.id }) { item ->
                             ArticleCard(
-                                article = article,
-                                onClick = { onArticleClick(article.id) },
-                                onToggleStar = { viewModel.toggleStar(article.id) },
+                                article = item.article,
+                                onClick = { onArticleClick(item.article.id) },
+                                onToggleStar = { viewModel.toggleStar(item.article.id) },
+                                clusterSize = item.clusterSize,
                             )
                         }
                     }
@@ -83,9 +87,12 @@ private fun EmptyHint(onManageFeeds: () -> Unit) {
     ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Text("📡", style = MaterialTheme.typography.headlineLarge)
-            Text("还没订内容", style = MaterialTheme.typography.titleMedium)
             Text(
-                "点击右上角 ⚙ 添加 RSS 源",
+                stringResource(R.string.empty_subscriptions_title),
+                style = MaterialTheme.typography.titleMedium,
+            )
+            Text(
+                stringResource(R.string.empty_subscriptions_sub),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )

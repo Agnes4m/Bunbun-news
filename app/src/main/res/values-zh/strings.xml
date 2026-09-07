@@ -19,7 +19,6 @@
     <string name="empty_placeholder">空空如也</string>
     <string name="add_feed">添加订阅</string>
     <string name="import_opml">导入 OPML</string>
-    <string name="subscribe_event">订阅此事件</string>
 
     <!-- 关于页（AboutScreen） -->
     <string name="about_tagline">一个轻量级 RSS 新闻聚合器</string>
@@ -127,6 +126,28 @@
     <string name="add_feed_button">添加</string>
     <string name="cancel">取消</string>
     <string name="open_in_browser">在浏览器中打开</string>
-    <string name="unsubscribed_event">订阅此事件后续报道</string>
+
+    <!-- v0.2 聚合去重 Plan A：事件时间线 -->
+    <string name="event_timeline_title">事件时间线</string>
+    <string name="event_timeline_summary">%1$d 篇报道，按时间排序</string>
+    <string name="event_first_report">首报</string>
+    <string name="event_followup">后续</string>
+    <string name="event_response">回应</string>
+    <string name="subscribe_event">订阅此事件后续报道</string>
     <string name="subscribed_event">已订阅此事件（点此取消）</string>
+    <string name="unsubscribed_event">订阅此事件后续报道</string>
+
+    <!-- v0.2 i18n 收尾：Reader 内嵌字串 -->
+    <string name="cd_back">返回</string>
+    <string name="cd_star">收藏</string>
+    <string name="cd_unstar">取消收藏</string>
+    <string name="cd_open_browser">在浏览器中打开</string>
+    <string name="reader_loading_article">加载中…</string>
+    <string name="fulltext_loading">正在加载完整正文…</string>
+    <string name="fulltext_failed">完整正文加载失败，可手动重试</string>
+    <string name="fulltext_retry">重试</string>
+
+    <!-- 订阅页 -->
+    <string name="cd_manage_subscriptions">管理订阅</string>
+    <string name="subscriptions_count_label">%1$d 篇已订内容（源 + 事件）</string>
 </resources>

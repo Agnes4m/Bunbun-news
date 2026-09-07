@@ -24,7 +24,6 @@
     <string name="empty_placeholder">Nothing here yet</string>
     <string name="add_feed">Add Feed</string>
     <string name="import_opml">Import OPML</string>
-    <string name="subscribe_event">Subscribe to event</string>
 
     <!-- About screen -->
     <string name="about_tagline">A lightweight RSS news aggregator</string>
@@ -132,6 +131,28 @@
     <string name="add_feed_button">Add</string>
     <string name="cancel">Cancel</string>
     <string name="open_in_browser">Open in browser</string>
-    <string name="unsubscribed_event">Subscribe to this event</string>
+
+    <!-- v0.2 聚合去重 Plan A：事件时间线 -->
+    <string name="event_timeline_title">Event timeline</string>
+    <string name="event_timeline_summary">%1$d reports, sorted by time</string>
+    <string name="event_first_report">First report</string>
+    <string name="event_followup">Follow-up</string>
+    <string name="event_response">Response</string>
+    <string name="subscribe_event">Subscribe to this event</string>
     <string name="subscribed_event">Subscribed to this event (tap to unsubscribe)</string>
+    <string name="unsubscribed_event">Subscribe to follow-up reports</string>
+
+    <!-- v0.2 i18n 收尾：Reader 内嵌字串 -->
+    <string name="cd_back">Back</string>
+    <string name="cd_star">Star</string>
+    <string name="cd_unstar">Unstar</string>
+    <string name="cd_open_browser">Open in browser</string>
+    <string name="reader_loading_article">Loading…</string>
+    <string name="fulltext_loading">Loading full text…</string>
+    <string name="fulltext_failed">Full text fetch failed, tap retry</string>
+    <string name="fulltext_retry">Retry</string>
+
+    <!-- Subscriptions screen -->
+    <string name="cd_manage_subscriptions">Manage subscriptions</string>
+    <string name="subscriptions_count_label">%1$d subscribed items (feeds + events)</string>
 </resources>
