@@ -4,17 +4,25 @@ import android.annotation.SuppressLint
 import android.view.ViewGroup
 import android.webkit.WebSettings
 import android.webkit.WebView
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.OpenInBrowser
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.outlined.StarOutline
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
@@ -22,19 +30,22 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.viewmodel.compose.viewModel
+import moe.bunbun.news.R
 import moe.bunbun.news.domain.model.Article
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -82,6 +93,11 @@ fun ReaderScreen(
                         onToggle = viewModel::toggleEventSubscription,
                     )
                 }
+                SummaryCard(
+                    summary = uiState.summary,
+                    loading = uiState.summaryLoading,
+                    onResummarize = viewModel::resummarize,
+                )
                 ArticleWebView(
                     html = current.contentHtml ?: current.excerpt ?: "<p>${current.url}</p>",
                     title = current.title,
@@ -92,10 +108,94 @@ fun ReaderScreen(
             } else {
                 Box(
                     modifier = Modifier.fillMaxSize(),
-                    contentAlignment = androidx.compose.ui.Alignment.Center,
+                    contentAlignment = Alignment.Center,
                 ) {
                     Text("加载中…", color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
+            }
+        }
+    }
+}
+
+/**
+ * AI 摘要卡片（v0.2 主题 D 子 7 — ReaderScreen 接入）。
+ *
+ * 渲染规则：
+ * - summaryLoading=true 且 summary=""：显示进度环 + "生成中…"
+ * - summary 非空：显示摘要 + 重新生成按钮
+ * - summary 加载完毕但为 null：显示"暂无摘要"提示
+ * - summary 为空字符串（初始 "" 状态）：折叠整个卡片（不显示）
+ */
+@Composable
+private fun SummaryCard(
+    summary: String?,
+    loading: Boolean,
+    onResummarize: () -> Unit,
+) {
+    // 完全没请求过：summary==null 时不显示任何东西
+    if (summary == null && !loading) return
+
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 8.dp)
+            .background(
+                color = MaterialTheme.colorScheme.secondaryContainer,
+                shape = RoundedCornerShape(12.dp),
+            )
+            .padding(12.dp),
+    ) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text(
+                text = stringResource(R.string.summary_section),
+                style = MaterialTheme.typography.labelLarge,
+                color = MaterialTheme.colorScheme.onSecondaryContainer,
+                fontWeight = FontWeight.SemiBold,
+                modifier = Modifier.weight(1f),
+            )
+            if (loading) {
+                CircularProgressIndicator(
+                    modifier = Modifier.height(16.dp),
+                    strokeWidth = 2.dp,
+                    color = MaterialTheme.colorScheme.onSecondaryContainer,
+                )
+            } else if (summary != null) {
+                TextButton(onClick = onResummarize) {
+                    Icon(
+                        Icons.Filled.Refresh,
+                        contentDescription = null,
+                        modifier = Modifier.height(16.dp),
+                    )
+                    Spacer(Modifier.height(0.dp))
+                    Text(
+                        stringResource(R.string.summary_resummarize),
+                        style = MaterialTheme.typography.labelSmall,
+                    )
+                }
+            }
+        }
+        Spacer(Modifier.height(4.dp))
+        when {
+            loading && summary.isNullOrBlank() -> {
+                Text(
+                    stringResource(R.string.summary_loading),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSecondaryContainer,
+                )
+            }
+            summary.isNullOrBlank() -> {
+                Text(
+                    stringResource(R.string.summary_empty),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSecondaryContainer,
+                )
+            }
+            else -> {
+                Text(
+                    summary,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSecondaryContainer,
+                )
             }
         }
     }

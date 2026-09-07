@@ -56,4 +56,14 @@
     <!-- 同事件多源卡片（v0.2 主题 B 子 4） -->
     <!-- cluster_badge: 多源报道提示（%d 为同 cluster 的文章数） -->
     <string name="cluster_badge">📰 %d 个源都在报道</string>
+
+    <!-- AI 摘要（v0.2 主题 D 子 7 — ReaderScreen 接入） -->
+    <!-- summary_section: 摘要分区标题 -->
+    <string name="summary_section">AI 摘要</string>
+    <!-- summary_loading: 摘要生成中 -->
+    <string name="summary_loading">生成中…</string>
+    <!-- summary_empty: 摘要不可用（provider 失败 / 未配置） -->
+    <string name="summary_empty">暂无摘要（未配置 AI provider 或网络失败）</string>
+    <!-- summary_resummarize: 重新生成按钮 -->
+    <string name="summary_resummarize">重新生成</string>
 </resources>

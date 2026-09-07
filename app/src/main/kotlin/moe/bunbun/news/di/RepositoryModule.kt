@@ -12,6 +12,8 @@ import moe.bunbun.news.data.repo.HistoryRepository
 import moe.bunbun.news.data.repo.HistoryRepositoryImpl
 import moe.bunbun.news.data.repo.SubscriptionRepository
 import moe.bunbun.news.data.repo.SubscriptionRepositoryImpl
+import moe.bunbun.news.data.summarycache.SummaryCacheRepository
+import moe.bunbun.news.data.summarycache.SummaryCacheRepositoryImpl
 import javax.inject.Singleton
 
 @Module
@@ -33,4 +35,8 @@ abstract class RepositoryModule {
     @Binds
     @Singleton
     abstract fun bindHistoryRepository(impl: HistoryRepositoryImpl): HistoryRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindSummaryCacheRepository(impl: SummaryCacheRepositoryImpl): SummaryCacheRepository
 }

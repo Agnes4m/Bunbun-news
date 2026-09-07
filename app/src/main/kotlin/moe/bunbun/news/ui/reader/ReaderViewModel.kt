@@ -14,6 +14,7 @@ import kotlinx.coroutines.launch
 import moe.bunbun.news.data.repo.ArticleRepository
 import moe.bunbun.news.data.repo.HistoryRepository
 import moe.bunbun.news.data.repo.SubscriptionRepository
+import moe.bunbun.news.data.summarycache.ArticleSummarizer
 import moe.bunbun.news.domain.model.Article
 import moe.bunbun.news.domain.model.SubscriptionType
 import javax.inject.Inject
@@ -22,6 +23,9 @@ data class ReaderUiState(
     val article: Article? = null,
     val clusterSize: Int = 0,        // 同 cluster 的文章数
     val isEventSubscribed: Boolean = false,
+    /** AI 摘要状态：null=未请求；""=请求中无内容；非空=有摘要 */
+    val summary: String? = null,
+    val summaryLoading: Boolean = false,
 )
 
 /**
@@ -35,6 +39,7 @@ class ReaderViewModel @Inject constructor(
     private val articleRepository: ArticleRepository,
     private val historyRepository: HistoryRepository,
     private val subscriptionRepository: SubscriptionRepository,
+    private val summarizer: ArticleSummarizer,
 ) : ViewModel() {
 
     private val articleIdFlow = MutableStateFlow<String?>(null)
@@ -66,6 +71,8 @@ class ReaderViewModel @Inject constructor(
                 )
             }
         }
+        // 加载 AI 摘要（ArticleSummarizer 内部走缓存优先）
+        loadSummary(articleId)
     }
 
     fun toggleEventSubscription() {
@@ -86,6 +93,25 @@ class ReaderViewModel @Inject constructor(
         val articleId = articleIdFlow.value ?: return
         viewModelScope.launch {
             articleRepository.toggleStar(articleId)
+        }
+    }
+
+    fun resummarize() {
+        val articleId = articleIdFlow.value ?: return
+        _uiState.value = _uiState.value.copy(summaryLoading = true)
+        viewModelScope.launch {
+            val article = articleRepository.getById(articleId) ?: return@launch
+            val out = summarizer.resummarize(articleId, article.title, article.contentHtml.orEmpty())
+            _uiState.value = _uiState.value.copy(summary = out, summaryLoading = false)
+        }
+    }
+
+    private fun loadSummary(articleId: String) {
+        _uiState.value = _uiState.value.copy(summaryLoading = true, summary = "")
+        viewModelScope.launch {
+            val article = articleRepository.getById(articleId) ?: return@launch
+            val out = summarizer.summarize(articleId, article.title, article.contentHtml.orEmpty())
+            _uiState.value = _uiState.value.copy(summary = out, summaryLoading = false)
         }
     }
 }
