@@ -108,6 +108,10 @@ interface ArticleDao {
     @Query("UPDATE articles SET clusterId = :clusterId WHERE id = :id")
     suspend fun setClusterId(id: String, clusterId: String)
 
+    /** v0.2-Reader-Content：写回抽取后的全文 HTML */
+    @Query("UPDATE articles SET contentHtml = :contentHtml WHERE id = :id")
+    suspend fun updateContentHtml(id: String, contentHtml: String?)
+
     @Query("SELECT COUNT(*) FROM articles WHERE clusterId IS NULL")
     suspend fun countWithoutCluster(): Int
 

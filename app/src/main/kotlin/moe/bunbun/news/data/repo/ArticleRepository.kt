@@ -34,6 +34,11 @@ interface ArticleRepository {
     suspend fun markRead(id: String, isRead: Boolean)
     suspend fun toggleStar(id: String)
     suspend fun setClusterId(id: String, clusterId: String)
+    /**
+     * v0.2-Reader-Content：把抽取后的全文 HTML 写回 DB。
+     * null 表示清除（保留 RSS 摘要）；非空会覆盖 contentHtml。
+     */
+    suspend fun updateContentHtml(id: String, contentHtml: String?)
 }
 
 @Singleton
@@ -96,5 +101,9 @@ class ArticleRepositoryImpl @Inject constructor(
 
     override suspend fun setClusterId(id: String, clusterId: String) {
         dao.setClusterId(id, clusterId)
+    }
+
+    override suspend fun updateContentHtml(id: String, contentHtml: String?) {
+        dao.updateContentHtml(id, contentHtml)
     }
 }

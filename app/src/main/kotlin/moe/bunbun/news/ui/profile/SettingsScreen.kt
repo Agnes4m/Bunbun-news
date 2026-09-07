@@ -73,6 +73,8 @@ class SettingsViewModel @Inject constructor(
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), SummaryProviderType.OFF)
     val appLocale: StateFlow<AppLocale> = prefs.appLocale
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), AppLocale.SYSTEM)
+    val autoFetchFulltext: StateFlow<Boolean> = prefs.autoFetchFulltext
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), true)
 
     fun setThemeMode(mode: ThemeMode?) {
         viewModelScope.launch { prefs.setThemeMode(mode) }
@@ -132,6 +134,10 @@ class SettingsViewModel @Inject constructor(
     fun setAppLocale(locale: AppLocale) {
         viewModelScope.launch { prefs.setAppLocale(locale) }
     }
+
+    fun setAutoFetchFulltext(enabled: Boolean) {
+        viewModelScope.launch { prefs.setAutoFetchFulltext(enabled) }
+    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -149,6 +155,7 @@ fun SettingsScreen(
     val backendUsername by viewModel.backendUsername.collectAsState()
     val summaryProvider by viewModel.summaryProvider.collectAsState()
     val appLocale by viewModel.appLocale.collectAsState()
+    val autoFetchFulltext by viewModel.autoFetchFulltext.collectAsState()
 
     Scaffold(
         modifier = modifier,
@@ -326,6 +333,29 @@ fun SettingsScreen(
             }
             if (summaryProvider == SummaryProviderType.DEEPSEEK) {
                 DeepSeekApiKeyForm(onSave = { key -> viewModel.setSummaryProvider(summaryProvider, key) })
+            }
+            HorizontalDivider()
+
+            // v0.2-Reader-Content：按需拉全文开关
+            SectionHeader("阅读")
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 4.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Column(modifier = Modifier.weight(1f)) {
+                    Text("按需加载完整正文", fontWeight = FontWeight.Medium)
+                    Text(
+                        "打开文章时若只有摘要，自动拉原文抽取；关闭后始终只用摘要（省流量）",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+                Switch(
+                    checked = autoFetchFulltext,
+                    onCheckedChange = viewModel::setAutoFetchFulltext,
+                )
             }
             HorizontalDivider()
 

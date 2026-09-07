@@ -116,6 +116,9 @@ class UserPreferences @Inject constructor(
     // v0.2 i18n：界面语言
     private val APP_LOCALE = stringPreferencesKey("app_locale")
 
+    // v0.2-Reader-Content：是否在 Reader 打开文章时按需拉全文（默认开启）
+    private val AUTO_FETCH_FULLTEXT = booleanPreferencesKey("auto_fetch_fulltext")
+
     /** 主题偏好：null = 跟随系统 */
     val themeMode: Flow<ThemeMode?> = context.dataStore.data.map { prefs ->
         // 优先读新字段；旧用户从 darkMode 字段迁移
@@ -158,6 +161,14 @@ class UserPreferences @Inject constructor(
     /** 用户界面语言（默认 SYSTEM = 跟随系统） */
     val appLocale: Flow<AppLocale> = context.dataStore.data.map {
         AppLocale.fromKey(it[APP_LOCALE])
+    }
+
+    /**
+     * v0.2-Reader-Content：是否在打开文章时按需拉全文（默认 true）。
+     * 关掉后 Reader 始终只用 RSS 的 excerpt，节省流量。
+     */
+    val autoFetchFulltext: Flow<Boolean> = context.dataStore.data.map {
+        it[AUTO_FETCH_FULLTEXT] ?: true
     }
 
     /** 设置主题偏好（null = 跟随系统） */
@@ -214,5 +225,9 @@ class UserPreferences @Inject constructor(
         context.dataStore.edit { it[APP_LOCALE] = locale.key }
         // 同步镜像到 LocaleCache，下一次 attachBaseContext 立即能读到
         localeCache.locale = locale
+    }
+
+    suspend fun setAutoFetchFulltext(enabled: Boolean) {
+        context.dataStore.edit { it[AUTO_FETCH_FULLTEXT] = enabled }
     }
 }

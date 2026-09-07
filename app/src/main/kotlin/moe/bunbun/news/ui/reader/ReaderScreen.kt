@@ -98,6 +98,12 @@ fun ReaderScreen(
                     loading = uiState.summaryLoading,
                     onResummarize = viewModel::resummarize,
                 )
+                // v0.2-Reader-Content：拉全文进度条 / 失败提示
+                FulltextStatusBar(
+                    loading = uiState.fulltextLoading,
+                    failed = uiState.fulltextFailed,
+                    onRetry = viewModel::retryFulltext,
+                )
                 ArticleWebView(
                     html = current.contentHtml ?: current.excerpt ?: "<p>${current.url}</p>",
                     title = current.title,
@@ -112,6 +118,51 @@ fun ReaderScreen(
                 ) {
                     Text("加载中…", color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
+            }
+        }
+    }
+}
+
+/**
+ * v0.2-Reader-Content：全文加载状态条。
+ *
+ * - loading：进度环 + 提示文字
+ * - failed：警示文字 + "重试" 按钮（用户主动触发再试一次）
+ * - 都 false：不渲染（透明）
+ */
+@Composable
+private fun FulltextStatusBar(
+    loading: Boolean,
+    failed: Boolean,
+    onRetry: () -> Unit,
+) {
+    if (!loading && !failed) return
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 4.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        if (loading) {
+            CircularProgressIndicator(
+                modifier = Modifier.height(16.dp),
+                strokeWidth = 2.dp,
+            )
+            Text(
+                "正在加载完整正文…",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        } else if (failed) {
+            Text(
+                "完整正文加载失败，可手动重试",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.error,
+                modifier = Modifier.weight(1f),
+            )
+            TextButton(onClick = onRetry) {
+                Text("重试", style = MaterialTheme.typography.labelMedium)
             }
         }
     }

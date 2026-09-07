@@ -7,16 +7,20 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import moe.bunbun.news.data.fulltext.FulltextExtractor
+import moe.bunbun.news.data.prefs.UserPreferences
 import moe.bunbun.news.data.repo.ArticleRepository
 import moe.bunbun.news.data.repo.HistoryRepository
 import moe.bunbun.news.data.repo.SubscriptionRepository
 import moe.bunbun.news.data.summarycache.ArticleSummarizer
 import moe.bunbun.news.domain.model.Article
 import moe.bunbun.news.domain.model.SubscriptionType
+import timber.log.Timber
 import javax.inject.Inject
 
 data class ReaderUiState(
@@ -26,6 +30,10 @@ data class ReaderUiState(
     /** AI 摘要状态：null=未请求；""=请求中无内容；非空=有摘要 */
     val summary: String? = null,
     val summaryLoading: Boolean = false,
+    /** v0.2-Reader-Content：是否正在拉全文 */
+    val fulltextLoading: Boolean = false,
+    /** 拉全文失败时为 true，UI 显示「重试」按钮 */
+    val fulltextFailed: Boolean = false,
 )
 
 /**
@@ -40,6 +48,8 @@ class ReaderViewModel @Inject constructor(
     private val historyRepository: HistoryRepository,
     private val subscriptionRepository: SubscriptionRepository,
     private val summarizer: ArticleSummarizer,
+    private val fulltextExtractor: FulltextExtractor,
+    private val userPreferences: UserPreferences,
 ) : ViewModel() {
 
     private val articleIdFlow = MutableStateFlow<String?>(null)
@@ -54,6 +64,8 @@ class ReaderViewModel @Inject constructor(
     fun setArticleId(articleId: String) {
         if (articleIdFlow.value == articleId) return
         articleIdFlow.value = articleId
+        // 重置全文加载状态（新文章）
+        _uiState.value = _uiState.value.copy(fulltextLoading = false, fulltextFailed = false)
         // 打开即标记已读 + 写历史
         viewModelScope.launch {
             articleRepository.markRead(articleId, true)
@@ -70,6 +82,8 @@ class ReaderViewModel @Inject constructor(
                     isEventSubscribed = isSubscribed,
                 )
             }
+            // v0.2-Reader-Content：检查是否需要按需拉全文
+            ensureFulltext(article)
         }
         // 加载 AI 摘要（ArticleSummarizer 内部走缓存优先）
         loadSummary(articleId)
@@ -106,6 +120,27 @@ class ReaderViewModel @Inject constructor(
         }
     }
 
+    /**
+     * v0.2-Reader-Content：手动重试（UI 上的「加载全文」按钮触发）。
+     * 强制重抽，绕过长度阈值。
+     */
+    fun retryFulltext() {
+        val articleId = articleIdFlow.value ?: return
+        viewModelScope.launch {
+            val article = articleRepository.getById(articleId) ?: return@launch
+            _uiState.value = _uiState.value.copy(fulltextLoading = true, fulltextFailed = false)
+            val result = fulltextExtractor.fetchAndExtract(article.url)
+            if (result?.hasContent == true) {
+                articleRepository.updateContentHtml(articleId, result.contentHtml)
+                Timber.tag("Reader").i("manual retry fulltext ok: ${result.contentHtml!!.length} chars")
+            } else {
+                _uiState.value = _uiState.value.copy(fulltextFailed = true)
+                Timber.tag("Reader").w("manual retry fulltext failed for ${article.url}")
+            }
+            _uiState.value = _uiState.value.copy(fulltextLoading = false)
+        }
+    }
+
     private fun loadSummary(articleId: String) {
         _uiState.value = _uiState.value.copy(summaryLoading = true, summary = "")
         viewModelScope.launch {
@@ -113,5 +148,39 @@ class ReaderViewModel @Inject constructor(
             val out = summarizer.summarize(articleId, article.title, article.contentHtml.orEmpty())
             _uiState.value = _uiState.value.copy(summary = out, summaryLoading = false)
         }
+    }
+
+    /**
+     * v0.2-Reader-Content：按需拉全文的判定与执行。
+     *
+     * 触发条件（同时满足）：
+     * 1. UserPreferences.autoFetchFulltext == true（用户没关）
+     * 2. 当前 contentHtml 为空 / 看起来只是摘要（长度 < [SHORT_CONTENT_THRESHOLD]）
+     * 3. URL 非空
+     *
+     * 拉到的全文直接写回 DB（observeById Flow 会自动推送，WebView 立刻重渲染）。
+     * 失败不弹错，只在 UI 露出「加载全文」按钮让用户手动重试。
+     */
+    private suspend fun ensureFulltext(article: Article) {
+        val autoFetch = userPreferences.autoFetchFulltext.first()
+        if (!autoFetch) return
+        if ((article.contentHtml?.length ?: 0) >= SHORT_CONTENT_THRESHOLD) return
+        if (article.url.isBlank()) return
+
+        _uiState.value = _uiState.value.copy(fulltextLoading = true, fulltextFailed = false)
+        val result = fulltextExtractor.fetchAndExtract(article.url)
+        if (result?.hasContent == true) {
+            articleRepository.updateContentHtml(article.id, result.contentHtml)
+            Timber.tag("Reader").i("auto fulltext ok: ${result.contentHtml!!.length} chars for ${article.url}")
+        } else {
+            _uiState.value = _uiState.value.copy(fulltextFailed = true)
+            Timber.tag("Reader").w("auto fulltext empty/failed for ${article.url}")
+        }
+        _uiState.value = _uiState.value.copy(fulltextLoading = false)
+    }
+
+    companion object {
+        /** 视为"只是摘要"的阈值：低于此长度认为 RSS 没给正文，触发拉取 */
+        private const val SHORT_CONTENT_THRESHOLD = 800
     }
 }
