@@ -60,7 +60,6 @@
     <!-- Settings screen -->
     <string name="settings_section_appearance">Appearance</string>
     <string name="settings_section_sync">Sync</string>
-    <string name="settings_section_cache">Cache</string>
     <string name="settings_section_backend">Cloud backend</string>
     <string name="settings_section_ai">AI summary</string>
     <string name="settings_section_language">Language</string>
@@ -155,4 +154,16 @@
     <!-- Subscriptions screen -->
     <string name="cd_manage_subscriptions">Manage subscriptions</string>
     <string name="subscriptions_count_label">%1$d subscribed items (feeds + events)</string>
+
+    <!-- Settings → Cache / Data wipe -->
+    <string name="settings_section_cache">Cache</string>
+    <string name="data_clear_history_title">Clear reading history</string>
+    <string name="data_clear_history_sub">Only clears history list. Feeds, articles, and stars are kept.</string>
+    <string name="data_clear_history_button">Clear</string>
+    <string name="data_reset_all_title">Reset all data</string>
+    <string name="data_reset_all_sub">Wipes everything (feeds, articles, history, settings). App restarts after.</string>
+    <string name="data_reset_all_button">Reset</string>
+    <string name="data_reset_confirm_title">Reset all data?</string>
+    <string name="data_reset_confirm_body">This will erase all feeds, articles, history, stars, and settings. You will need to re-import feeds. This cannot be undone.</string>
+    <string name="data_reset_confirm_yes">Reset everything</string>
 </resources>

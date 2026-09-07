@@ -10,7 +10,9 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -21,6 +23,7 @@ import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -39,6 +42,10 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
+import android.app.ActivityManager
+import android.content.Context
+import androidx.core.content.getSystemService
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -49,12 +56,16 @@ import moe.bunbun.news.data.prefs.SummaryProviderType
 import moe.bunbun.news.data.prefs.SyncInterval
 import moe.bunbun.news.data.prefs.ThemeMode
 import moe.bunbun.news.data.prefs.UserPreferences
+import moe.bunbun.news.data.repo.HistoryRepository
 import moe.bunbun.news.data.syncbridge.BackendConfigResolver
+import timber.log.Timber
 import javax.inject.Inject
 
 @HiltViewModel
 class SettingsViewModel @Inject constructor(
     private val prefs: UserPreferences,
+    private val historyRepository: HistoryRepository,
+    @ApplicationContext private val appContext: Context,
 ) : ViewModel() {
     /** null = 跟随系统；LIGHT/DARK/EYE_CARE 三态 */
     val themeMode: StateFlow<ThemeMode?> = prefs.themeMode
@@ -137,6 +148,37 @@ class SettingsViewModel @Inject constructor(
 
     fun setAutoFetchFulltext(enabled: Boolean) {
         viewModelScope.launch { prefs.setAutoFetchFulltext(enabled) }
+    }
+
+    /**
+     * v0.2 Settings：清空阅读历史（仅 history 表）。
+     * 订阅源 / 文章 / 星标全部保留。
+     */
+    fun clearReadingHistory() {
+        viewModelScope.launch {
+            try {
+                historyRepository.deleteAll()
+                Timber.tag("Settings").i("reading history cleared")
+            } catch (t: Throwable) {
+                Timber.tag("Settings").w(t, "clearReadingHistory failed")
+            }
+        }
+    }
+
+    /**
+     * v0.2 Settings：重置数据库（清空所有表 + 还原 firstLaunchDone）。
+     * 等价于 `pm clear`，但用户在 app 内一键搞定；调用后进程会被系统杀掉重启。
+     */
+    fun resetAllData() {
+        viewModelScope.launch {
+            try {
+                val am = appContext.getSystemService<ActivityManager>()
+                val ok = am?.clearApplicationUserData() == true
+                Timber.tag("Settings").i("resetAllData: clearApplicationUserData=$ok")
+            } catch (t: Throwable) {
+                Timber.tag("Settings").w(t, "resetAllData failed")
+            }
+        }
     }
 }
 
@@ -359,17 +401,57 @@ fun SettingsScreen(
             }
             HorizontalDivider()
 
-            SectionHeader("缓存")
+            SectionHeader(stringResource(R.string.settings_section_cache))
             SettingRow(
-                title = "清空阅读历史",
-                subtitle = "设置项 v0.2 实装",
-                trailing = {},
+                title = stringResource(R.string.data_clear_history_title),
+                subtitle = stringResource(R.string.data_clear_history_sub),
+                trailing = {
+                    TextButton(onClick = { viewModel.clearReadingHistory() }) {
+                        Text(stringResource(R.string.data_clear_history_button))
+                    }
+                },
             )
+            // 重置数据库 — 标红危险动作，需要二次确认
+            var showResetConfirm by remember { mutableStateOf(false) }
             SettingRow(
-                title = "重置数据库",
-                subtitle = "设置项 v0.2 实装",
-                trailing = {},
+                title = stringResource(R.string.data_reset_all_title),
+                subtitle = stringResource(R.string.data_reset_all_sub),
+                trailing = {
+                    TextButton(
+                        onClick = { showResetConfirm = true },
+                        colors = ButtonDefaults.textButtonColors(
+                            contentColor = MaterialTheme.colorScheme.error,
+                        ),
+                    ) {
+                        Text(stringResource(R.string.data_reset_all_button))
+                    }
+                },
             )
+            if (showResetConfirm) {
+                AlertDialog(
+                    onDismissRequest = { showResetConfirm = false },
+                    title = { Text(stringResource(R.string.data_reset_confirm_title)) },
+                    text = { Text(stringResource(R.string.data_reset_confirm_body)) },
+                    confirmButton = {
+                        TextButton(
+                            onClick = {
+                                showResetConfirm = false
+                                viewModel.resetAllData()
+                            },
+                            colors = ButtonDefaults.textButtonColors(
+                                contentColor = MaterialTheme.colorScheme.error,
+                            ),
+                        ) {
+                            Text(stringResource(R.string.data_reset_confirm_yes))
+                        }
+                    },
+                    dismissButton = {
+                        TextButton(onClick = { showResetConfirm = false }) {
+                            Text(stringResource(R.string.cancel))
+                        }
+                    },
+                )
+            }
         }
     }
 }

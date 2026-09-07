@@ -55,7 +55,6 @@
     <!-- 设置页 -->
     <string name="settings_section_appearance">外观</string>
     <string name="settings_section_sync">同步</string>
-    <string name="settings_section_cache">缓存</string>
     <string name="settings_section_backend">云端后端</string>
     <string name="settings_section_ai">AI 摘要</string>
     <string name="settings_section_language">语言</string>
@@ -150,4 +149,16 @@
     <!-- 订阅页 -->
     <string name="cd_manage_subscriptions">管理订阅</string>
     <string name="subscriptions_count_label">%1$d 篇已订内容（源 + 事件）</string>
+
+    <!-- Settings → 缓存 / 数据清除 -->
+    <string name="settings_section_cache">缓存</string>
+    <string name="data_clear_history_title">清空阅读历史</string>
+    <string name="data_clear_history_sub">仅清空历史记录。订阅源、文章、星标全部保留。</string>
+    <string name="data_clear_history_button">清空</string>
+    <string name="data_reset_all_title">重置数据库</string>
+    <string name="data_reset_all_sub">清空所有数据（订阅、文章、历史、设置）。完成后 app 自动重启。</string>
+    <string name="data_reset_all_button">重置</string>
+    <string name="data_reset_confirm_title">确认重置所有数据？</string>
+    <string name="data_reset_confirm_body">这将删除所有订阅、文章、历史、星标和设置。你需要重新导入订阅源。此操作不可撤销。</string>
+    <string name="data_reset_confirm_yes">确认重置</string>
 </resources>
