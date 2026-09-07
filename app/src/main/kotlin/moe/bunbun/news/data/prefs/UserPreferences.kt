@@ -40,6 +40,21 @@ enum class ThemeMode(val key: String) {
     }
 }
 
+/**
+ * 云端后端类型（v0.2 主题 C 子 4 配置持久化）。
+ * 用 string 存 DataStore，启动时映射回 [SyncBackend]。
+ */
+enum class BackendType(val key: String) {
+    LOCAL("local"),
+    MINIFLUX("miniflux"),
+    FEVER("fever"),
+    ;
+
+    companion object {
+        fun fromKey(key: String?): BackendType = entries.firstOrNull { it.key == key } ?: LOCAL
+    }
+}
+
 @Singleton
 class UserPreferences @Inject constructor(
     @ApplicationContext private val context: Context,
@@ -50,6 +65,14 @@ class UserPreferences @Inject constructor(
     // v0.1.1 旧字段保留读取兼容（v0.2 已切到 theme_mode）
     private val DARK_MODE_LEGACY = booleanPreferencesKey("dark_mode")
     private val DYNAMIC_COLOR = booleanPreferencesKey("dynamic_color")
+
+    // v0.2 主题 C 子 4：后端同步配置
+    private val BACKEND_TYPE = stringPreferencesKey("backend_type")
+    private val BACKEND_URL = stringPreferencesKey("backend_url")
+    private val BACKEND_USERNAME = stringPreferencesKey("backend_username")
+    private val BACKEND_API_KEY = stringPreferencesKey("backend_api_key")
+    // 同步方向：PULL_ONLY / PUSH_ONLY / BIDIRECTIONAL / DISABLED
+    private val SYNC_DIRECTION = stringPreferencesKey("sync_direction")
 
     /** 主题偏好：null = 跟随系统 */
     val themeMode: Flow<ThemeMode?> = context.dataStore.data.map { prefs ->
@@ -68,6 +91,19 @@ class UserPreferences @Inject constructor(
     }
 
     val firstLaunchDone: Flow<Boolean> = context.dataStore.data.map { it[FIRST_LAUNCH_DONE] ?: false }
+
+    /** 后端类型（默认 LOCAL） */
+    val backendType: Flow<BackendType> = context.dataStore.data.map {
+        BackendType.fromKey(it[BACKEND_TYPE])
+    }
+
+    /** 后端配置快照（url / username / apiKey 任一字段缺失时返回 null，由调用方回退到 LOCAL） */
+    val backendUrl: Flow<String?> = context.dataStore.data.map { it[BACKEND_URL] }
+    val backendUsername: Flow<String?> = context.dataStore.data.map { it[BACKEND_USERNAME] }
+    val backendApiKey: Flow<String?> = context.dataStore.data.map { it[BACKEND_API_KEY] }
+
+    /** 同步方向（默认 BIDIRECTIONAL；LOCAL_ONLY 后端强制禁用 push） */
+    val syncDirection: Flow<String> = context.dataStore.data.map { it[SYNC_DIRECTION] ?: "BIDIRECTIONAL" }
 
     /** 设置主题偏好（null = 跟随系统） */
     suspend fun setThemeMode(mode: ThemeMode?) {
@@ -92,5 +128,23 @@ class UserPreferences @Inject constructor(
 
     suspend fun markFirstLaunchDone() {
         context.dataStore.edit { it[FIRST_LAUNCH_DONE] = true }
+    }
+
+    suspend fun setBackend(
+        type: BackendType,
+        url: String? = null,
+        username: String? = null,
+        apiKey: String? = null,
+    ) {
+        context.dataStore.edit { prefs ->
+            prefs[BACKEND_TYPE] = type.key
+            if (url != null) prefs[BACKEND_URL] = url else prefs.remove(BACKEND_URL)
+            if (username != null) prefs[BACKEND_USERNAME] = username else prefs.remove(BACKEND_USERNAME)
+            if (apiKey != null) prefs[BACKEND_API_KEY] = apiKey else prefs.remove(BACKEND_API_KEY)
+        }
+    }
+
+    suspend fun setSyncDirectionPref(direction: String) {
+        context.dataStore.edit { it[SYNC_DIRECTION] = direction }
     }
 }
