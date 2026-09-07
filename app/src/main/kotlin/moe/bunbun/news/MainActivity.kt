@@ -15,8 +15,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import dagger.hilt.android.AndroidEntryPoint
-import javax.inject.Inject
-import moe.bunbun.news.i18n.LocaleCache
+import moe.bunbun.news.data.prefs.AppLocale
 import moe.bunbun.news.i18n.LocaleHelper
 import moe.bunbun.news.ui.nav.MainViewModel
 import moe.bunbun.news.ui.nav.ZixunNavHost
@@ -25,14 +24,14 @@ import moe.bunbun.news.ui.theme.BunbunNewsTheme
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 
-    @Inject lateinit var localeCache: LocaleCache
-
     private val viewModel: MainViewModel by viewModels()
 
     override fun attachBaseContext(newBase: Context) {
-        // attachBaseContext 是同步钩子，无法 await DataStore
-        // LocaleCache 用 SharedPreferences 提供同步读路径
-        super.attachBaseContext(LocaleHelper.wrap(newBase, localeCache.locale))
+        // attachBaseContext 在 Hilt 注入之前调用，**不能**依赖 @Inject lateinit var。
+        // 直接同步读 SharedPreferences（LocaleCache 用的就是同一份 sp 文件），
+        // 这是 attachBaseContext 唯一可用的同步路径。
+        val locale = readCachedLocale(newBase)
+        super.attachBaseContext(LocaleHelper.wrap(newBase, locale))
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -47,6 +46,21 @@ class MainActivity : ComponentActivity() {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
                     ZixunNavHost(modifier = Modifier.padding(innerPadding))
                 }
+            }
+        }
+    }
+
+    companion object {
+        private const val LOCALE_SP = "bunbun_locale_cache"
+        private const val LOCALE_KEY = "app_locale"
+        private fun readCachedLocale(ctx: Context): AppLocale {
+            return try {
+                val key = ctx.applicationContext
+                    .getSharedPreferences(LOCALE_SP, Context.MODE_PRIVATE)
+                    .getString(LOCALE_KEY, null)
+                AppLocale.fromKey(key)
+            } catch (_: Throwable) {
+                AppLocale.SYSTEM
             }
         }
     }
