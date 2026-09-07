@@ -55,6 +55,21 @@ enum class BackendType(val key: String) {
     }
 }
 
+/**
+ * AI 摘要 provider 类型（v0.2 主题 D 子 4）。
+ * OFF / DEEPSEEK / LOCAL。
+ */
+enum class SummaryProviderType(val key: String) {
+    OFF("off"),
+    DEEPSEEK("deepseek"),
+    LOCAL("local"),
+    ;
+
+    companion object {
+        fun fromKey(key: String?): SummaryProviderType = entries.firstOrNull { it.key == key } ?: OFF
+    }
+}
+
 @Singleton
 class UserPreferences @Inject constructor(
     @ApplicationContext private val context: Context,
@@ -73,6 +88,10 @@ class UserPreferences @Inject constructor(
     private val BACKEND_API_KEY = stringPreferencesKey("backend_api_key")
     // 同步方向：PULL_ONLY / PUSH_ONLY / BIDIRECTIONAL / DISABLED
     private val SYNC_DIRECTION = stringPreferencesKey("sync_direction")
+
+    // v0.2 主题 D 子 4：AI 摘要 provider 配置
+    private val SUMMARY_PROVIDER = stringPreferencesKey("summary_provider")
+    private val DEEPSEEK_API_KEY = stringPreferencesKey("deepseek_api_key")
 
     /** 主题偏好：null = 跟随系统 */
     val themeMode: Flow<ThemeMode?> = context.dataStore.data.map { prefs ->
@@ -104,6 +123,14 @@ class UserPreferences @Inject constructor(
 
     /** 同步方向（默认 BIDIRECTIONAL；LOCAL_ONLY 后端强制禁用 push） */
     val syncDirection: Flow<String> = context.dataStore.data.map { it[SYNC_DIRECTION] ?: "BIDIRECTIONAL" }
+
+    /** AI 摘要 provider（默认 OFF） */
+    val summaryProvider: Flow<SummaryProviderType> = context.dataStore.data.map {
+        SummaryProviderType.fromKey(it[SUMMARY_PROVIDER])
+    }
+
+    /** DeepSeek API key */
+    val deepseekApiKey: Flow<String?> = context.dataStore.data.map { it[DEEPSEEK_API_KEY] }
 
     /** 设置主题偏好（null = 跟随系统） */
     suspend fun setThemeMode(mode: ThemeMode?) {
@@ -146,5 +173,12 @@ class UserPreferences @Inject constructor(
 
     suspend fun setSyncDirectionPref(direction: String) {
         context.dataStore.edit { it[SYNC_DIRECTION] = direction }
+    }
+
+    suspend fun setSummaryProvider(type: SummaryProviderType, deepseekApiKey: String? = null) {
+        context.dataStore.edit { prefs ->
+            prefs[SUMMARY_PROVIDER] = type.key
+            if (deepseekApiKey != null) prefs[DEEPSEEK_API_KEY] = deepseekApiKey
+        }
     }
 }

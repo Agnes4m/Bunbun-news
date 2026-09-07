@@ -1,30 +1,26 @@
 package moe.bunbun.news.di
 
-import dagger.Binds
 import dagger.Module
+import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
-import moe.bunbun.news.data.summary.LocalSummaryProvider
 import moe.bunbun.news.data.summary.SummaryProvider
+import moe.bunbun.news.data.summary.SummaryProviderFactory
 import javax.inject.Singleton
 
 /**
- * SummaryProvider 的默认绑定：当前是 LocalSummaryProvider（占位）。
+ * SummaryProvider 绑定：当前指向 SummaryProviderFactory（路由器），
+ * 路由器根据 UserPreferences.summaryProvider 字段在每次调用时选择实际 provider。
  *
- * 后续 v0.2 主题 D 子 4（云端/本地选择器）会改为：
- * - @Provides 根据 UserPreferences.summaryProvider 字段返回不同实现
- * - OFF → 返回一个返回 null 的 NoOpProvider
- * - DEEPSEEK → 返回 DeepSeekSummaryProvider
- * - LOCAL → 返回 LocalSummaryProvider
- *
- * 现在 D 子 4 未做完，先用 LocalSummaryProvider 占位，ReaderScreen 会拿到 null
- * 摘要并显示"暂无摘要"。
+ * 历史：
+ * - v0.2 主题 D 子 3：曾用 @Binds 直接绑 LocalSummaryProvider（占位）
+ * - v0.2 主题 D 子 4（本 commit）：改为工厂模式，支持 OFF / DEEPSEEK / LOCAL 切换
  */
 @Module
 @InstallIn(SingletonComponent::class)
-abstract class SummaryModule {
+object SummaryModule {
 
-    @Binds
+    @Provides
     @Singleton
-    abstract fun bindSummaryProvider(impl: LocalSummaryProvider): SummaryProvider
+    fun provideSummaryProvider(factory: SummaryProviderFactory): SummaryProvider = factory
 }
