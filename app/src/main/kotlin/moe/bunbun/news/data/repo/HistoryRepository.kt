@@ -15,6 +15,8 @@ interface HistoryRepository {
     suspend fun recordRead(articleId: String, scrollPercent: Float = 0f)
     suspend fun delete(articleId: String)
     suspend fun deleteOlderThan(before: Instant)
+    /** v0.2 Settings：清空阅读历史（仅 history 表，保留订阅/文章） */
+    suspend fun deleteAll()
     suspend fun count(): Int
 }
 
@@ -42,6 +44,10 @@ class HistoryRepositoryImpl @Inject constructor(
 
     override suspend fun deleteOlderThan(before: Instant) {
         dao.deleteOlderThan(before.toEpochMilli())
+    }
+
+    override suspend fun deleteAll() {
+        dao.deleteAll()
     }
 
     override suspend fun count(): Int = dao.count()

@@ -24,6 +24,10 @@ interface HistoryDao {
     @Query("DELETE FROM history WHERE readAt < :before")
     suspend fun deleteOlderThan(before: Long)
 
+    /** v0.2 Settings：清空阅读历史（保留 feeds / articles / subscriptions） */
+    @Query("DELETE FROM history")
+    suspend fun deleteAll()
+
     @Query("SELECT COUNT(*) FROM history")
     suspend fun count(): Int
 }
