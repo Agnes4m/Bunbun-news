@@ -1,13 +1,16 @@
 name: Release
 
+# 触发策略：仅在用户在 GitHub UI 创建/发布 Release 时触发构建。
+# 之前用 `push: tags: v*` 会在 git push tag 时立即触发，本地打 tag 也会跑 CI。
+# 现在要求：先在 GitHub UI 点 "Draft a new release" → 写 notes → "Publish release"，
+# workflow 才会跑。这样 CI 不在每次 push 跑 build，符合"release 触发"的语义。
 on:
-  push:
-    tags:
-      - 'v*'
+  release:
+    types: [published]
 
 jobs:
   release:
-    name: Build & Release APK
+    name: Build & Upload Release APK
     runs-on: ubuntu-latest
 
     steps:
@@ -29,20 +32,10 @@ jobs:
       - name: Build release APK
         run: ./gradlew assembleRelease --stacktrace
 
-      - name: Create GitHub Release
+      - name: Upload APK to Release
         uses: softprops/action-gh-release@v2
         with:
-          name: Bunbun News ${{ github.ref_name }}
-          body: |
-            ## 文闻 Bunbun News ${{ github.ref_name }}
-
-            > 构建由 GitHub Actions 自动生成。
-
-            ### 下载
-
-            解压下方 `bunbun-news-release` artifact 获取 APK。
           files: |
             app/build/outputs/apk/release/*.apk
-          generate_release_notes: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

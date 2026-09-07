@@ -28,7 +28,6 @@ import moe.bunbun.news.R
 import moe.bunbun.news.ui.categories.CategoriesScreen
 import moe.bunbun.news.ui.home.HomeScreen
 import moe.bunbun.news.ui.managefeeds.ManageFeedsScreen
-import moe.bunbun.news.ui.onboarding.OnboardingScreen
 import moe.bunbun.news.ui.profile.AboutScreen
 import moe.bunbun.news.ui.profile.HistoryListScreen
 import moe.bunbun.news.ui.profile.ProfileScreen
@@ -54,16 +53,10 @@ private enum class SubScreen { None, ManageFeeds, History, Starred, Settings, Ab
 
 @Composable
 fun ZixunNavHost(modifier: Modifier = Modifier) {
-    val rootViewModel: MainViewModel = hiltViewModel()
-    val firstLaunchDone by rootViewModel.firstLaunchDone.collectAsState()
-
-    // 首次启动（firstLaunchDone 还没读到或为 false）显示 OnboardingScreen，
-    // 主界面在引导页导入完成 / 跳过后才接管。
-    if (firstLaunchDone != true) {
-        OnboardingScreen(modifier = modifier)
-        return
-    }
-
+    // v0.2 主题 A 子 X：移除 firstLaunchDone 引导门控。
+    // 主界面任何 Tab（HomeScreen / SubscriptionsScreen）若 articles/feeds 为空，
+    // 内部渲染 EmptyFeedScreen（位于 ui.common 包），用户可一键导入或跳管理。
+    // 这样彻底避开 v0.1 NavHost if/else 切换的 Compose recomposition 残留 bug。
     var selected by remember { mutableStateOf(TopDestination.Home) }
     var subScreen by remember { mutableStateOf(SubScreen.None) }
     var readingArticleId by remember { mutableStateOf<String?>(null) }
@@ -128,6 +121,10 @@ fun ZixunNavHost(modifier: Modifier = Modifier) {
                 SubScreen.None -> when (selected) {
                     TopDestination.Home -> HomeScreen(
                         onArticleClick = onArticleClick,
+                        onNavigateToManageFeeds = {
+                            selected = TopDestination.Subscriptions
+                            subScreen = SubScreen.ManageFeeds
+                        },
                         modifier = modifier.fillMaxSize().padding(innerPadding),
                     )
                     TopDestination.Search -> SearchScreen(
