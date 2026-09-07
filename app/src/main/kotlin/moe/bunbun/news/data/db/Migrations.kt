@@ -12,14 +12,15 @@ import androidx.sqlite.db.SupportSQLiteDatabase
 val MIGRATION_1_2: Migration = object : Migration(1, 2) {
     override fun migrate(db: SupportSQLiteDatabase) {
         // 1) 建 articles_fts FTS4 表（与 @Fts4(contentEntity = ArticleEntity::class) 一致）
-        //    schema：FTS4(content="articles", contentRowid="rowid")
+        //    schema：FTS4(content=articles, content_rowid=rowid)
+        //    注意：content_rowid 选项是列名（裸标识符），不能用 `=` 加反引号字符串
         db.execSQL(
             """
             CREATE VIRTUAL TABLE IF NOT EXISTS `articles_fts` USING FTS4(
                 `title`,
                 `excerpt`,
                 content=`articles`,
-                content_rowid=`rowid`
+                content_rowid=rowid
             )
             """.trimIndent(),
         )
