@@ -3,20 +3,69 @@
     android:height="108dp"
     android:viewportWidth="108"
     android:viewportHeight="108">
-    <!-- 文闻 Logo: 报纸 + 羽扇 占位 -->
+    <!--
+      文闻 Bunbun News launcher icon (v0.3)
+
+      概念：射命丸文（鸦天狗记者）的羽毛笔 + 墨点
+      - 主体：一支倾斜的羽毛笔（quill pen）
+      - 笔尖墨点：3 颗大小递减的圆，象征"刚写完"
+      - 折叠纸张角：右下角暗示"新闻"（非必要装饰）
+
+      配色：
+      - 白色 #FFFFFF 主轮廓（兼容 monochrome / 浅色主题）
+      - 背景由 ic_launcher_background.xml 提供（青墨 #00897B）
+
+      坐标范围：108x108，inner safe zone 是 18-90
+    -->
+
+    <!-- 1) 羽毛笔主轴：从右上 (90, 22) 斜向下到左下 (32, 86) -->
+    <!-- 用 stroke 画一根曲线笔杆（厚度 5），strokeCap 圆头 -->
+    <path
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="5"
+        android:strokeLineCap="round"
+        android:pathData="M82,28 C72,40 50,60 32,84" />
+
+    <!-- 2) 笔尖 nib：三角 -->
     <path
         android:fillColor="#FFFFFF"
-        android:pathData="M30,30 L78,30 L78,82 L30,82 Z" />
+        android:pathData="M28,86 L36,84 L32,92 Z" />
+
+    <!-- 3) 羽枝 barbs：主轴左侧 7 根羽枝（外侧更长） -->
     <path
-        android:fillColor="#00897B"
-        android:pathData="M34,36 L74,36 L74,40 L34,40 Z" />
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="2.5"
+        android:strokeLineCap="round"
+        android:pathData="
+            M34,82 C26,78 22,76 18,76
+            M38,76 C30,70 26,66 22,64
+            M43,69 C36,62 32,56 28,52
+            M49,62 C42,54 40,46 36,40
+            M56,55 C50,46 48,38 46,30
+            M63,48 C60,40 60,32 60,24
+            M70,42 C70,34 72,28 76,22" />
+
+    <!-- 4) 羽枝右侧 5 根短枝（对称感 + 丰盈感） -->
     <path
-        android:fillColor="#00897B"
-        android:pathData="M34,46 L74,46 L74,50 L34,50 Z" />
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="2"
+        android:strokeLineCap="round"
+        android:pathData="
+            M37,80 C44,80 48,82 52,84
+            M44,72 C50,72 56,74 60,76
+            M51,64 C58,64 64,66 68,68
+            M58,56 C66,56 72,58 76,60
+            M65,48 C72,48 78,50 82,50" />
+
+    <!-- 5) 笔尖落墨：3 颗圆点，从大到小 -->
     <path
-        android:fillColor="#00897B"
-        android:pathData="M34,56 L64,56 L64,60 L34,60 Z" />
+        android:fillColor="#FFFFFF"
+        android:pathData="M22,90 m-3,0 a3,3 0 1,0 6,0 a3,3 0 1,0 -6,0" />
     <path
-        android:fillColor="#EF6C00"
-        android:pathData="M52,66 L60,66 L56,78 Z" />
+        android:fillColor="#FFFFFF"
+        android:pathData="M16,96 m-2,0 a2,2 0 1,0 4,0 a2,2 0 1,0 -4,0" />
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M24,98 m-1.5,0 a1.5,1.5 0 1,0 3,0 a1.5,1.5 0 1,0 -3,0" />
+
 </vector>
