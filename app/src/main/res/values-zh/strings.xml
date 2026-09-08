@@ -161,4 +161,7 @@
     <string name="data_reset_confirm_title">确认重置所有数据？</string>
     <string name="data_reset_confirm_body">这将删除所有订阅、文章、历史、星标和设置。你需要重新导入订阅源。此操作不可撤销。</string>
     <string name="data_reset_confirm_yes">确认重置</string>
+
+    <!-- 首页下拉随机推荐 -->
+    <string name="home_shuffle_cd">随机推荐</string>
 </resources>

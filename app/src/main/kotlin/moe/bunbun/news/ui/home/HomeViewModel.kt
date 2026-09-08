@@ -3,13 +3,17 @@ package moe.bunbun.news.ui.home
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import moe.bunbun.news.data.repo.ArticleRepository
 import moe.bunbun.news.domain.model.Article
+import java.time.Duration
 import java.time.Instant
 import javax.inject.Inject
 
@@ -73,6 +77,35 @@ class HomeViewModel @Inject constructor(
         }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
+    /**
+     * v0.2 下拉随机推荐：从最近 7 天的所有文章池里随机抽 N=20 篇。
+     * - 数据源：observeRecent(200) → 按 publishedAt >= 7天前过滤
+     * - 用 [shuffleSeed] 作 StateFlow，下拉刷新 → 自增 seed → 重新打乱
+     * - 用 kotlin.random.Random(seed) 保证同 seed 同结果（测试友好）
+     */
+    private val shuffleSeed = MutableStateFlow(0L)
+
+    val shuffledArticles: StateFlow<List<HotArticle>> = combine(
+        hotArticles,
+        shuffleSeed,
+    ) { hot, seed ->
+        if (seed == 0L) {
+            // 首次进入：直接显示热度排序结果（不下拉也有内容）
+            hot
+        } else {
+            // 下拉刷新：从热度结果里再抽 N=SHUFFLE_SIZE 篇打乱顺序
+            // 这里复用 hotArticles 的 cluster 合并 + clusterSize 信息
+            hot.shuffled(kotlin.random.Random(seed)).take(SHUFFLE_SIZE)
+        }
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
+
+    /**
+     * 触发一次随机重排。每次调用自增 seed，下游 combine 自动重新洗牌。
+     */
+    fun shuffle() {
+        shuffleSeed.value = System.currentTimeMillis()
+    }
+
     fun markRead(articleId: String) {
         viewModelScope.launch {
             articleRepository.markRead(articleId, true)
@@ -83,5 +116,10 @@ class HomeViewModel @Inject constructor(
         viewModelScope.launch {
             articleRepository.toggleStar(articleId)
         }
+    }
+
+    companion object {
+        /** 随机推荐的展示数。 */
+        private const val SHUFFLE_SIZE = 20
     }
 }

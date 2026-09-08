@@ -166,4 +166,7 @@
     <string name="data_reset_confirm_title">Reset all data?</string>
     <string name="data_reset_confirm_body">This will erase all feeds, articles, history, stars, and settings. You will need to re-import feeds. This cannot be undone.</string>
     <string name="data_reset_confirm_yes">Reset everything</string>
+
+    <!-- Home pull-to-refresh shuffle -->
+    <string name="home_shuffle_cd">Shuffle recommendations</string>
 </resources>
