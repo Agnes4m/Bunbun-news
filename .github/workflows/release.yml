@@ -12,6 +12,10 @@ jobs:
   release:
     name: Build & Upload Release APK
     runs-on: ubuntu-latest
+    # v0.2.1 修复：默认 GITHUB_TOKEN 在部分 repo 配置下无 release 写权限，
+    # 显式声明 contents 写权限确保 softprops/action-gh-release@v2 能上传 asset
+    permissions:
+      contents: write
 
     steps:
       - name: Checkout
