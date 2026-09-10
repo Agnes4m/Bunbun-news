@@ -14,8 +14,8 @@ android {
         applicationId = "moe.bunbun.news"
         minSdk = libs.versions.minSdk.get().toInt()
         targetSdk = libs.versions.targetSdk.get().toInt()
-        versionCode = 1
-        versionName = "0.1.0"
+        versionCode = 2
+        versionName = "0.2.0"
 
         vectorDrawables {
             useSupportLibrary = true
@@ -29,6 +29,9 @@ android {
             versionNameSuffix = "-debug"
         }
         release {
+            // v0.2 阶段 M9 plan：用 debug key 简化发布签名（等正式 keystore 准备就绪再切）
+            // 不带签名构建出来的 app-release-unsigned.apk 无法直接装机
+            signingConfig = signingConfigs.getByName("debug")
             isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
